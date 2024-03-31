@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div id="historyContainer">
+            <button id="showHistoryButton" class="title__general">History</button>
+            <article class="history scrollbar__general" id="historyList" style="display: none" >
+                <ul class="history__list flex__general list__general">
+                    <li class="history__info title__general">History</li>
+                </ul>
+            </article>
+        </div>
+        
+        <section class="ai">
+            <div class="ai__inner container__general scrollbar__general">
+                <ul class="ai__list flex__general list__general">
+                    <li class="ai__answer_label" id="ai_label">
+                        <span class="badge bg-primary mb-2">
+                            Joe
+                        </span>
+                        <br>
+                            Hello! Please ask me a question to get started! The more descriptive the question, the better answer you get.
+                    </li>
+                    <li>
+                        <span class="badge bg-secondary mb-2">User</span>
+                        <br>
+                        <div class="ai__search" id="ai__search">   
+                            <textarea id="multilineInput" rows="1" style="height: auto" class="ai__input" maxlength="500" placeholder="Ask me anything"></textarea>
+                            <div style="border-radius: 10px;">
+                                <button class="ai__submit" type="submit" id="ai_submit">
+                                    &#129122;
+                                </button>
+                                <div id="charCount">0 / 500</div>
+                            </div>
+                        </div>
+                        <div  id='ai_user_search'>
+                                
+                        </div>
+                    </li>
+                    <li id="ai__answer">
+                        
+                    </li>
+                    
+
+                </ul>
+                
+                
+            </div>
+        </section>
+        <article class="api">
+            <button class="ai__login title__general">Login</button>
+        </article>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
