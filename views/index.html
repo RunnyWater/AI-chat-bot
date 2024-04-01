@@ -11,8 +11,9 @@
         <div id="historyContainer">
             <button id="showHistoryButton" class="title__general">History</button>
             <article class="history scrollbar__general" id="historyList" style="display: none" >
-                <ul class="history__list flex__general list__general">
-                    <li class="history__info title__general">History</li>
+                <ul class="history__list flex__general list__general" id="history">
+                    <li class=" title__general"><span class="history__info">History</span></li>
+                    <!-- QUESTION_HISTORY -->
                 </ul>
             </article>
         </div>
@@ -22,7 +23,7 @@
                 <ul class="ai__list flex__general list__general">
                     <li class="ai__answer_label" id="ai_label">
                         <span class="badge bg-primary mb-2">
-                            Joe
+                            Village Dummy Joe
                         </span>
                         <br>
                             Hello! Please ask me a question to get started! The more descriptive the question, the better answer you get.
@@ -45,12 +46,19 @@
                     </li>
                     <li id="ai__answer">
                     </li>
+                    <li></li>
                 </ul>
             </div>
         </section>
-        <article class="api">
-            <button class="ai__login title__general">Login</button>
-        </article>
+        <div class="api">
+            <button class="ai__login title__general">Sing in</button>
+                <div class='ai__twoapi'>
+                    <div id="random__fact__label">
+                        
+                        <span  id="random__fact"></span>
+                    </div>
+                </div>
+        </div>
     </div>
     <script src="js/script.js"></script>
 </body>

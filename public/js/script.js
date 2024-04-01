@@ -74,6 +74,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
     const textarea = document.getElementById('multilineInput');
     const text = textarea.value; // Get the text from the textarea
     
+    
     // Check if the text is empty
     if (text === '') {
         alert('Please enter text in the textarea');
@@ -87,22 +88,46 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             },
             body: JSON.stringify({ aiInput: text }),
         })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
+            let [answerElementValue, randomFactValue] = data;
             document.getElementById('ai_user_search').innerText = text;
             delete_textarea();
             var answerElement = document.getElementById('ai__answer');
-            answerElement.innerHTML += `<span class="badge bg-primary mb-2">Joe</span><br>${data}`;
+            answerElement.innerHTML += `<span class="badge bg-primary mb-2">Village Dummy Joe</span><br>${answerElementValue}`;
+            var randomFact = document.getElementById('random__fact__label');
+            randomFact.innerHTML += `<span class="badge bg-dark-orange mb-2">Random fact</span>
+            <br> ${randomFactValue}`;
+
         })
         .catch((error) => {
             console.error('Error:', error);
         });       
     }
+    
 
     function delete_textarea() {
         var label = document.getElementById('ai__search');
         label.remove();
     }
 
+
     
+    
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const userId = '1'; // Replace this with the actual user ID
+    fetch(`/user-question-history?userId=${userId}`)
+        .then(response => response.json())
+        .then(questionHistory => {
+            const historyElement = document.getElementById('history');
+            questionHistory.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item}`;
+                historyElement.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error fetching question history:', error));
 });

@@ -90,6 +90,9 @@ a:hover {
 .bg-secondary {
     background-color: #575a7b !important;
 }
+.bg-dark-orange{
+    background-color: #8a5327 !important;
+}
 ul li {
     list-style-type: none;
     color: rgb(232, 232, 232);
@@ -115,7 +118,7 @@ h6 {
 .container__general {
     max-width: 1000px;
     margin: 0 auto;
-    height: 85vh;
+    height: 100%;
     overflow: auto;
     padding: 0px 20px 0px 20px;
 }
@@ -144,7 +147,7 @@ body {
     background: #292929;
 }
 .title__general {
-    font-size: 20px;
+    font-size: 35px;
     color: #fff;
 }
 .history__logo {
@@ -160,7 +163,7 @@ body {
     overflow: auto;
     flex: 1;
     width: 300px;
-    background-color: #1a1a1a;
+    background-color: rgb(40, 40, 43);
     height: 100%;
     top: 100%;
     padding: 50px 20px 0px 20px;
@@ -241,11 +244,19 @@ body {
     padding-top: 50px;
     position: relative;
 }
+.history__info{
+    color: rgb(228, 205, 205);
+}
+.history__items{
+    left: 1em;
+    font-size: 20px;
+    color: rgb(155, 155, 155);
+}
 .ai__search {
-    z-index: 12;
+    z-index: 0;
     position: relative;
     width: 300%;
-    height: auto;
+    /* height: auto; */
     background-color: #292929;
     display: flex;
     align-items: center;
@@ -264,7 +275,6 @@ body {
 }
 
 
-
 .ai__submit {
     position: relative;
     left: calc(100% - 50px);
@@ -275,8 +285,6 @@ body {
 }
 .ai__answer_label {
     z-index: 0;
-    /* color: #fff; */
-    /* line-height: 120%; */
 }
 #ai_answer {
     align-items: left;
@@ -300,13 +308,28 @@ body {
 .ai__login:hover {
     box-shadow: 0px 3px 5px #fff;
 }
+#random__fact__label{
+    display: flex;
+    align-items: center;
+    align-self: center;
+    flex-direction: column;
+}
 .ai__twoapi {
-    max-width: 300px;
-    overflow: auto;
-    height: 65vh;
+    display: flex;
+    position: relative;
+    font-weight: 400;
+    line-height: 1;
+    padding: .3em .6em;
+    vertical-align: baseline;
+    position: absolute;
+    color:  rgb(155, 155, 155);
+    font-size: 2em !important;
+    margin-top: calc(100%/6);
 }
 .api {
     padding: 50px 20px 0px 20px;
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Space out the children */
 }
 @media(max-width:1650px) {
     .ai__input {
@@ -332,3 +355,4 @@ body {
     color: #777;
     text-shadow:0px 0px 3px #444;
 }
+
