@@ -288,6 +288,7 @@ body {
 .right{
     left: calc(100% - 50px);
 }
+
 .ai__answer_label {
     z-index: 0;
 }
@@ -330,6 +331,7 @@ body {
     color:  rgb(155, 155, 155);
     font-size: 2em !important;
     margin-top: 5%;
+
 }
 .api {
     padding: 50px 20px 0px 20px;

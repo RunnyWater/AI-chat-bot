@@ -49,6 +49,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     }
 
 
+
     function hideHistory() {
         const historyList = document.getElementById('historyList');
         historyList.style.display = 'none';
@@ -56,12 +57,6 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         const hideHistoryButton = document.getElementById('hideHistoryButton');
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
-
-});
-
-
-
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
@@ -97,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     multilineInput.addEventListener('input', updateCharCount);
 
 
+
     updateCharCount();
 });
 
@@ -104,16 +100,19 @@ document.getElementById('ai_submit').addEventListener('click', function() {
     const textarea = document.getElementById('multilineInput');
     const text = textarea.value; 
     
+
     if (text === '') {
         alert('Please enter text in the textarea');
         return;
     } else {
         fetch('/ai_answer', {
+
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ aiInput: text, UserId: ID }),
+
         })
         .then(response => response.json())
         .then(data => {

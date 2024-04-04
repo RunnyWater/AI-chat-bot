@@ -17,7 +17,6 @@ const app = express();
 const api_key_exa =  process.env.API_KEY_EXA;
 const api_key_ninja = process.env.API_KEY_NINJA;
 const exa = new Exa(api_key_exa);
-// const user_id = '2';
 
 
 async function sendDetailedQueryToExa(query, userId) {
