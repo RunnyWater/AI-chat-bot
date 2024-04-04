@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
+    <textarea type="text" id="id_user"></textarea>
     <div class="wrapper">
         <div id="historyContainer">
             <button id="showHistoryButton" class="title__general">History</button>
@@ -34,17 +35,21 @@
                         <div class="ai__search" id="ai__search">   
                             <textarea id="multilineInput" rows="1" style="height: auto" class="ai__input" maxlength="500" placeholder="Ask me anything"></textarea>
                             <div style="border-radius: 10px;">
-                                <button class="ai__submit" type="submit" id="ai_submit">
+                                <button class="ai__button right" type="submit" id="ai_submit">
                                     &#129122;
                                 </button>
                                 <div id="charCount">0 / 500</div>
                             </div>
                         </div>
                         <div  id='ai_user_search'>
-                                
+
+
                         </div>
                     </li>
-                    <li id="ai__answer">
+                    <li id ="ai_answer_list" style= "display: none;">
+                        <span id="ai_answer_badge" class="badge bg-primary mb-2">Village Dummy Joe</span><br>
+                        <p id ="ai__answer"></p>
+                        <div id="ai_update"><button class="ai__button left">&#10227;</button></div>
                     </li>
                     <li></li>
                 </ul>
@@ -52,12 +57,12 @@
         </section>
         <div class="api">
             <button class="ai__login title__general">Sing in</button>
-                <div class='ai__twoapi'>
-                    <div id="random__fact__label">
-                        
-                        <span  id="random__fact"></span>
-                    </div>
-                </div>
+            <div class="ai__twoapi">
+                <div id="random__fact__label" style="display: none;">
+                    <span class="badge bg-dark-orange mb-2">Random fact</span>
+                     <span id="random__fact"></span>
+                </div>   
+            </div>
         </div>
     </div>
     <script src="js/script.js"></script>
