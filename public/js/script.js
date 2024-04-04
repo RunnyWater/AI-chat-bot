@@ -58,6 +58,8 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
 
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
 
@@ -147,10 +149,10 @@ document.getElementById('ai_submit').addEventListener('click', function() {
         });       
     }
 
-            function delete_textarea() {
-                var label = document.getElementById('ai__search');
-                label.remove();
-            }
+    function delete_textarea() {
+        var label = document.getElementById('ai__search');
+        label.remove();
+    }
         
         
             
