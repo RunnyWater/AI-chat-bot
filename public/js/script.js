@@ -57,7 +57,6 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         const hideHistoryButton = document.getElementById('hideHistoryButton');
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
-
 });
 
 document.addEventListener('DOMContentLoaded', function() {
