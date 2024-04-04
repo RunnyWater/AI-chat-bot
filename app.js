@@ -17,7 +17,7 @@ const app = express();
 const api_key_exa =  process.env.API_KEY_EXA;
 const api_key_ninja = process.env.API_KEY_NINJA;
 const exa = new Exa(api_key_exa);
-const user_id = '2';
+// const user_id = '2';
 
 
 async function sendDetailedQueryToExa(query, userId) {
@@ -73,21 +73,37 @@ async function getNewRandomFact() {
 
 
 
-app.post('/', (req, res) => {
+app.post('/ai_answer', (req, res) => {
     const query = req.body.aiInput;
+    const UserId = req.body.UserId;
     const id = getQuestionIdByContent(query)
     if (id){
-        addQuestionIdToUser(user_id,id);
-        let answer = [getResponseByUserIdAndQuestionId(user_id, id), getRandomFactFromQuestionId(id)];
+        addQuestionIdToUser(UserId,id);
+        let answer = [getResponseByUserIdAndQuestionId(UserId, id), getRandomFactFromQuestionId(id)];
         res.send(answer);
     }else{
-        let answer = [sendDetailedQueryToExa(query, user_id), getNewRandomFact()]
+        let answer = [sendDetailedQueryToExa(query, UserId), getNewRandomFact()]
         res.send(answer);
     }
 });
 
+app.post('/ai_update', (req, res) => {
+    const userId = req.body.UserId;
+    const responseText = req.body.responseText;
+    const questionId = getQuestionIdByContent(responseText);
+    let newResponse = getNextResponse(userId, questionId);
+    console.log(newResponse);
+    document.getElementById('ai__answer').innerText = data;
+    res.send(newResponse);
+
+});
 
 
+app.post('/get_history', (req, res) => {
+    const UserId = req.body.userId;
+    const questionHistory = getUserQuestionHistory(UserId);
+    res.send(questionHistory);
+});
 
 
 function getRandomFactFromQuestionId(questionId){
@@ -120,22 +136,9 @@ function getUserQuestionHistory(userId) {
 }
 
 app.get('/', (req, res) => { 
-    const questionHistory = getUserQuestionHistory(user_id);
-    let questionHistoryHtml = '';
-    // Generate the HTML for the question history
-    questionHistory.forEach(item => {
-        questionHistoryHtml += `<li class="history__items">${item}</li>`;
-    });
-
-    // Load your existing home page HTML
-    const homePageHtml = fs.readFileSync('./views/index.html', 'utf8');
-
-    // Insert the question history HTML into the home page HTML
-    // This assumes you have a placeholder in your HTML like <!-- QUESTION_HISTORY -->
-    const finalHtml = homePageHtml.replace('<!-- QUESTION_HISTORY -->', questionHistoryHtml);
-
-    res.send(finalHtml);
+    res.send(fs.readFileSync('./views/index.html', 'utf8'));
 });
+
 
 
 function getResponseByUserIdAndQuestionId(userId, questionId) {

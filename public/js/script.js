@@ -1,24 +1,54 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const showHistoryButton = document.getElementById('showHistoryButton');
+var ID = 0; // Guest number
 
-    function showHistory() {
-        const historyList = document.getElementById('historyList');
-        historyList.style.display = 'block';
 
-        const hideHistoryButton = document.createElement('button');
-        hideHistoryButton.id = 'hideHistoryButton';
-        hideHistoryButton.className = 'title__general';
-        hideHistoryButton.textContent = "⤬";
-        hideHistoryButton.addEventListener('click', hideHistory);
+document.getElementById('showHistoryButton').addEventListener('click', function() {
+    const historyList = document.getElementById('historyList');
+    historyList.style.display = 'block';
+    const hideHistoryButton = document.createElement('button');
+    hideHistoryButton.id = 'hideHistoryButton';
+    hideHistoryButton.className = 'title__general';
+    hideHistoryButton.textContent = "⤬";
+    hideHistoryButton.addEventListener('click', hideHistory);
+    document.getElementById('historyContainer').appendChild(hideHistoryButton);
+    setTimeout(function() {
+        hideHistoryButton.style.opacity = '1'; 
+    }, 10); // Delay in milliseconds
 
-        // Add the button to the DOM but keep it invisible
-        document.getElementById('historyContainer').appendChild(hideHistoryButton);
+    if (document.getElementById('ai_user_search').value!==''){
+        const id_textarea = document.getElementById('ai_user_search');
+        ID = id_textarea.value;
+        fetch('/get_history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: ID }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('lol')
+            delete_id_textarea();
+            let questionHistoryHtml = '';
+            data.forEach(item => {
+                questionHistoryHtml += `<li class="history__items">${item}</li>`;
+            });
+            let history = document.getElementById('history');
+            history.innerHTML += questionHistoryHtml;
 
-        // Use setTimeout to delay the opacity change, allowing the button to be added to the DOM first
-        setTimeout(function() {
-            hideHistoryButton.style.opacity = '1'; // Make the button visible
-        }, 10); // Delay in milliseconds
+        })
+        .catch((error) => {
+            console.error('Error getting the response:', error);
+        });
     }
+
+    // TODO: REMOVE AFTER INSTALLING NORMAL LOGIN
+
+    function delete_id_textarea() {
+        var id_area = document.getElementById('ai_user_search');
+        id_area.style.display = 'none';
+        id_area.value = '';
+    }
+
 
     function hideHistory() {
         const historyList = document.getElementById('historyList');
@@ -28,22 +58,23 @@ document.addEventListener('DOMContentLoaded', function() {
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
 
-    showHistoryButton.addEventListener('click', showHistory);
 });
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
 
     // Function to adjust the height of the textarea
     function autoResize() {
-        this.style.height = 'auto'; // Reset the height
-        this.style.height = this.scrollHeight + 'px'; // Set the height to the scroll height
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px'; 
     }
 
-    // Attach the autoResize function to the input event
     multilineInput.addEventListener('input', autoResize);
 
-    // Call autoResize once to set the initial height
     autoResize.call(multilineInput);
 });
 
@@ -57,77 +88,75 @@ document.addEventListener('DOMContentLoaded', function() {
         const charCountValue = multilineInput.value.length;
         if (charCountValue >= 300) {
             charCount.textContent = charCountValue + ' / 500';
-            charCount.style.display = 'block'; // Show the character count element
+            charCount.style.display = 'block'; 
         } else {
-            charCount.style.display = 'none'; // Hide the character count element
+            charCount.style.display = 'none'; 
         }
     }
 
-    // Attach the updateCharCount function to the input event
+
     multilineInput.addEventListener('input', updateCharCount);
 
-    // Call updateCharCount once to set the initial character count
+
     updateCharCount();
 });
 
 document.getElementById('ai_submit').addEventListener('click', function() {
     const textarea = document.getElementById('multilineInput');
-    const text = textarea.value; // Get the text from the textarea
+    const text = textarea.value; 
     
-    
-    // Check if the text is empty
     if (text === '') {
         alert('Please enter text in the textarea');
         return;
     } else {
-        // Send the text to the server
-        fetch('/', {
+        fetch('/ai_answer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ aiInput: text }),
+            body: JSON.stringify({ aiInput: text, UserId: ID }),
         })
         .then(response => response.json())
         .then(data => {
             let [answerElementValue, randomFactValue] = data;
             document.getElementById('ai_user_search').innerText = text;
             delete_textarea();
-            var answerElement = document.getElementById('ai__answer');
-            answerElement.innerHTML += `<span class="badge bg-primary mb-2">Village Dummy Joe</span><br>${answerElementValue}`;
+            document.getElementById('ai__answer').innerText = answerElementValue;
+            document.getElementById('ai_answer_list').style.display = "block";
+            // RANDOM FACT
             var randomFact = document.getElementById('random__fact__label');
             randomFact.innerHTML += `<span class="badge bg-dark-orange mb-2">Random fact</span>
             <br> ${randomFactValue}`;
+            document.getElementById('ai_update').addEventListener('click', function() {
+                fetch('/ai_update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ UserId: ID, responseText: text}),
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('ai__answer').innerText = data;
+            
+                })
+                .catch((error) => {
+                    console.error('Error updating the response:', error);
+                })});   
 
         })
         .catch((error) => {
-            console.error('Error:', error);
+            console.error('Error getting the response:', error);
         });       
     }
-    
 
-    function delete_textarea() {
-        var label = document.getElementById('ai__search');
-        label.remove();
-    }
-
-
-    
-    
-});
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    const userId = '1'; // Replace this with the actual user ID
-    fetch(`/user-question-history?userId=${userId}`)
-        .then(response => response.json())
-        .then(questionHistory => {
-            const historyElement = document.getElementById('history');
-            questionHistory.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${item}`;
-                historyElement.appendChild(listItem);
-            });
-        })
-        .catch(error => console.error('Error fetching question history:', error));
+            function delete_textarea() {
+                var label = document.getElementById('ai__search');
+                label.remove();
+            }
+        
+        
+            
+            
 });
