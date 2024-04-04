@@ -58,6 +58,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
 
+    });
 document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
 
