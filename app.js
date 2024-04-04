@@ -93,7 +93,6 @@ app.post('/ai_update', (req, res) => {
     const questionId = getQuestionIdByContent(responseText);
     let newResponse = getNextResponse(userId, questionId);
     console.log(newResponse);
-    document.getElementById('ai__answer').innerText = data;
     res.send(newResponse);
 
 });

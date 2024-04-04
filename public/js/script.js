@@ -14,8 +14,8 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         hideHistoryButton.style.opacity = '1'; 
     }, 10); // Delay in milliseconds
 
-    if (document.getElementById('ai_user_search').value!==''){
-        const id_textarea = document.getElementById('ai_user_search');
+    if (document.getElementById('id_user').value!==''){
+        const id_textarea = document.getElementById('id_user');
         ID = id_textarea.value;
         fetch('/get_history', {
             method: 'POST',
@@ -26,7 +26,6 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         })
         .then(response => response.json())
         .then(data => {
-            console.log('lol')
             delete_id_textarea();
             let questionHistoryHtml = '';
             data.forEach(item => {
@@ -44,7 +43,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     // TODO: REMOVE AFTER INSTALLING NORMAL LOGIN
 
     function delete_id_textarea() {
-        var id_area = document.getElementById('ai_user_search');
+        var id_area = document.getElementById('id_user');
         id_area.style.display = 'none';
         id_area.value = '';
     }
@@ -124,9 +123,8 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             document.getElementById('ai__answer').innerText = answerElementValue;
             document.getElementById('ai_answer_list').style.display = "block";
             // RANDOM FACT
-            var randomFact = document.getElementById('random__fact__label');
-            randomFact.innerHTML += `<span class="badge bg-dark-orange mb-2">Random fact</span>
-            <br> ${randomFactValue}`;
+            document.getElementById('random__fact__label').style.display = "block";
+            document.getElementById('random__fact').innerText = randomFactValue;
             document.getElementById('ai_update').addEventListener('click', function() {
                 fetch('/ai_update', {
                     method: 'POST',
@@ -137,7 +135,6 @@ document.getElementById('ai_submit').addEventListener('click', function() {
                 })
                 .then(response => response.text())
                 .then(data => {
-                    console.log(data);
                     document.getElementById('ai__answer').innerText = data;
             
                 })

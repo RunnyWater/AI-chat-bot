@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
-    <textarea type="text" id="ai_user_search"></textarea>
+    <textarea type="text" id="id_user"></textarea>
     <div class="wrapper">
         <div id="historyContainer">
             <button id="showHistoryButton" class="title__general">History</button>
@@ -56,12 +56,12 @@
         </section>
         <div class="api">
             <button class="ai__login title__general">Sing in</button>
-                <div class='ai__twoapi'>
-                    <div id="random__fact__label">
-                        
-                        <span  id="random__fact"></span>
-                    </div>
-                </div>
+            <div class="ai__twoapi">
+                <div id="random__fact__label" style="display: none;">
+                    <span class="badge bg-dark-orange mb-2">Random fact</span>
+                     <span id="random__fact"></span>
+                </div>   
+            </div>
         </div>
     </div>
     <script src="js/script.js"></script>
