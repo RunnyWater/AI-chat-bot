@@ -179,7 +179,33 @@ body {
     width: 360px;
     top: 0%;
 
+
 }
+
+.question_div{
+    
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden auto;
+    flex: 2, 1, 0%;
+
+}
+
+.history__button{
+    text-align: left;
+    width: inherit;
+    font-size: 20px;
+    background: transparent;
+    color: grey;
+    height: 65px;
+    width: -webkit-fill-available;
+    transition: all 100ms linear;
+}
+.history__button:hover{
+    color: #b4b3b3;
+}
+
 #hideHistoryButton{
     position: fixed;
     left: 330px;
@@ -249,6 +275,7 @@ body {
 }
 .history__items{
     left: 1em;
+    width: 300px;
     font-size: 20px;
     color: rgb(155, 155, 155);
 }

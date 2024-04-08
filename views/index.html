@@ -13,8 +13,9 @@
             <button id="showHistoryButton" class="title__general">History</button>
             <article class="history scrollbar__general" id="historyList" style="display: none" >
                 <ul class="history__list flex__general list__general" id="history">
-                    <li class=" title__general"><span class="history__info">History</span></li>
-                    <!-- QUESTION_HISTORY -->
+                    <li class=" title__general"><span class="history__info" id="history_label">History</span></li>
+                    <div id="question__div" class="question__div">
+                    </div>
                 </ul>
             </article>
         </div>
@@ -60,7 +61,8 @@
             <div class="ai__twoapi">
                 <div id="random__fact__label" style="display: none;">
                     <span class="badge bg-dark-orange mb-2">Random fact</span>
-                     <span id="random__fact"></span>
+                    <br>
+                    <span id="random__fact"></span>
                 </div>   
             </div>
         </div>

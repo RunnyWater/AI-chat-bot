@@ -69,13 +69,25 @@ async function getNewRandomFact() {
   });
 }
 
-
+app.post('/get_answer', (req, res) => {
+    const question = req.body.question;
+    const userId = req.body.userId;
+    const id = getQuestionIdByContent(question);
+    if(question===undefined){
+        console.log("No question found")
+        return;
+    }
+    const randomFact = getRandomFactFromQuestionId(id);
+    const response = getResponseByUserIdAndQuestionId(userId, id);
+    res.send([question, response, randomFact])
+});
 
 
 app.post('/ai_answer', (req, res) => {
     const query = req.body.aiInput;
-    const UserId = req.body.UserId;
-    const id = getQuestionIdByContent(query)
+    const UserId = req.body.userId;
+    const id = getQuestionIdByContent(query);
+    
     if (id){
         addQuestionIdToUser(UserId,id);
         let answer = [getResponseByUserIdAndQuestionId(UserId, id), getRandomFactFromQuestionId(id)];
@@ -87,11 +99,10 @@ app.post('/ai_answer', (req, res) => {
 });
 
 app.post('/ai_update', (req, res) => {
-    const userId = req.body.UserId;
+    const userId = req.body.userId;
     const responseText = req.body.responseText;
     const questionId = getQuestionIdByContent(responseText);
     let newResponse = getNextResponse(userId, questionId);
-    console.log(newResponse);
     res.send(newResponse);
 
 });
@@ -99,14 +110,21 @@ app.post('/ai_update', (req, res) => {
 
 app.post('/get_history', (req, res) => {
     const UserId = req.body.userId;
+    if (parseInt(UserId)===0){
+        return res.send('0');
+    }
     const questionHistory = getUserQuestionHistory(UserId);
     res.send(questionHistory);
 });
 
 
-function getRandomFactFromQuestionId(questionId){
+function getRandomFactFromQuestionId(questionId) {
     const questions = loadQuestions();
     const question = questions.questions.find(q => q.id === questionId);
+    if (!question) {
+        // Handle the case where the question is not found, e.g., return a default value or an error message
+        return "Question not found";
+    }
     return question.fact;
 }
 
@@ -136,8 +154,6 @@ function getUserQuestionHistory(userId) {
 app.get('/', (req, res) => { 
     res.send(fs.readFileSync('./views/index.html', 'utf8'));
 });
-
-
 
 function getResponseByUserIdAndQuestionId(userId, questionId) {
     // Load users and questions
@@ -177,6 +193,9 @@ function getWholeQuestionById(questionId) {
 
 
 function getQuestionIdByContent(query) {
+    if (typeof query !== 'string') {
+        return false;
+    }
     const questions = loadQuestions();
     const matchingQuestions = questions.questions.find(q => q.question.toLowerCase().replace(/[^a-z A-Z ]/g, "").replace(" ", "").includes(query.toLowerCase().replace(/[^a-z A-Z ]/g, "").replace(" ", "")));
     return matchingQuestions === undefined ? false : matchingQuestions.id;
@@ -189,7 +208,6 @@ function addQuestionIdToUser(userId, questionId) {
 
     // Find the user by userId
     const user = users.users.find(user => user.userId === userId);
-
     // If the user is found
     if (user) {
         // Check if the questionId is already in the user's questionsId array
