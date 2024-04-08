@@ -153,7 +153,7 @@ function getUserQuestionHistory(userId) {
 }
 
 app.get('/', (req, res) => { 
-    res.send(fs.readFileSync('./views/index.html', 'utf8'));
+    res.send(fs.readFileSync('./views/homepage.html', 'utf8'));
 });
 
 
