@@ -83,11 +83,12 @@ app.post('/get_answer', (req, res) => {
 });
 
 
+
 app.post('/ai_answer', (req, res) => {
     const query = req.body.aiInput;
     const UserId = req.body.userId;
     const id = getQuestionIdByContent(query);
-    
+
     if (id){
         addQuestionIdToUser(UserId,id);
         let answer = [getResponseByUserIdAndQuestionId(UserId, id), getRandomFactFromQuestionId(id)];
@@ -154,6 +155,7 @@ function getUserQuestionHistory(userId) {
 app.get('/', (req, res) => { 
     res.send(fs.readFileSync('./views/index.html', 'utf8'));
 });
+
 
 function getResponseByUserIdAndQuestionId(userId, questionId) {
     // Load users and questions

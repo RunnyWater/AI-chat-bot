@@ -66,6 +66,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                 })
             })
 
+
         })
         .catch((error) => {
             console.error('Error getting the response:', error);
@@ -80,9 +81,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         id_area.value = '';
     }
 
-
-
-
+  
     function hideHistory() {
         const historyList = document.getElementById('historyList');
         historyList.style.display = 'none';
@@ -111,6 +110,7 @@ document.getElementById('ai_update').addEventListener('click', function() {
     .catch((error) => {
         console.error('Error updating the response:', error);
     })});
+
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -168,6 +168,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             },
             body: JSON.stringify({ aiInput: text, userId: ID }),
 
+
         })
         .then(response => response.json())
         .then(data => {
@@ -175,6 +176,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             document.getElementById('ai_user_search').innerText = text;
             // delete_textarea();
             document.getElementById('ai__search').style.display = 'none';
+
             document.getElementById('ai__answer').innerText = answerElementValue;
             document.getElementById('ai_answer_list').style.display = "block";
             // RANDOM FACT
@@ -187,6 +189,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ userId: ID, responseText: text}),
+
                 })
                 .then(response => response.text())
                 .then(data => {
@@ -203,10 +206,4 @@ document.getElementById('ai_submit').addEventListener('click', function() {
         });       
     }
 
-    // function delete_textarea() {
-    //     var label = document.getElementById('ai__search');
-    //     // label.remove();
-    //     label.style.display = 'none';
-    // }
-      
 });
