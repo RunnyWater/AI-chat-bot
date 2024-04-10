@@ -127,6 +127,9 @@ h6 {
     flex-direction: column;
     gap: 50px;
 }
+#history {
+    gap: 35px !important
+}
 .container__general::-webkit-scrollbar {
     width: 8px;
     background-color: unset;
@@ -326,6 +329,18 @@ body {
     color: #fff;
     line-height: 120%;
 }   
+a.reset-link {
+    text-decoration: none;
+    color: inherit; 
+     
+}
+a.reset-link:hover,
+a.reset-link:focus,
+a.reset-link:active {
+    text-decoration: none;
+    color: inherit;
+}
+
 
 .ai__login {
     background-color: #595959;
@@ -365,6 +380,28 @@ body {
     align-items: center; /* Align items vertically in the center */
     justify-content: space-between; /* Space out the children */
 }
+
+.logged_in_box{
+    width: 250px;
+    height: 50px;
+    border-radius: 10px;
+    margin-bottom: 50px;
+    color: #ffffff;
+    font-size: 24px;
+    font-family: "Roboto", sans-serif;
+
+}
+.icon__logout{
+    width: 24px;
+    height: 24px;
+}
+.log_out__button{
+    color: #ffffff;
+    font-size: 24px;
+    background-color: transparent;
+
+}
+
 @media(max-width:1650px) {
     .ai__input {
         max-width: 50%;

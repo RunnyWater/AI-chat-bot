@@ -1,4 +1,53 @@
-var ID = '0'; // Guest number
+let history_opened = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/check_login')
+        .then(response => response.text())
+        .then(data => {
+            if(data === '0'){
+                document.getElementById('login_button').style.display= 'flex';
+            }else{
+                document.getElementById('login_button').style.display= 'none';
+                document.getElementById('user_logged_in').innerHTML = `<img src="images/user_logged_in.png" class="icon__logout">
+                <span style="padding-left: 5px;" id="user_name"><button class="log_out__button" id="log_out">${data}</button></span>`
+                document.getElementById('log_out').addEventListener('click', function() {
+
+
+                    if(confirm("Are you sure you want to log out?")){
+                        logout()
+                    }else{
+                        
+                    }
+                    
+                    function logout() {
+                        // Make a request to the server's logout endpoint
+                        fetch('/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            // Redirect the user to the login page or homepage
+                            window.location.href = '/login'; // Adjust the URL as necessary
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
+                    }
+
+                })
+
+            }})
+        .catch((error) => {
+            console.error('Error getting the response:', error);
+        })
+});
+
+
 
 document.getElementById('showHistoryButton').addEventListener('click', function() {
     const historyList = document.getElementById('historyList');
@@ -12,21 +61,19 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     setTimeout(function() {
         hideHistoryButton.style.opacity = '1'; 
     }, 10); // Delay in milliseconds
+    // console.log("ebat")
+    if (!history_opened) {
 
-    if (document.getElementById('id_user').value!==''){
-        const id_textarea = document.getElementById('id_user');
-        ID = id_textarea.value;
         fetch('/get_history', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId: ID }),
+            }
         })
         .then(response => response.json())
         .then(data => {
-            delete_id_textarea();
-            if (data == 0) {
+            console.log(data)
+            if (data === 0) {
                 document.getElementById('history_label').innerHTML = "Please log in";
                 return;
             }
@@ -34,6 +81,8 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
             data.forEach(item => {
                 questionHistoryHtml += `<li class="history__items" ><button class="history__button" id="${item}">${item}</button></li>`;
             });
+            history_opened = true;
+
             let history = document.getElementById('question__div');
             history.innerHTML += questionHistoryHtml;
             data.forEach(item => {
@@ -43,7 +92,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ question: item, userId: ID }),
+                        body: JSON.stringify({ question: item}),
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -62,7 +111,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                     .catch((error) => {
                         console.error('Error getting the response:', error);
                     })
-    
+
                 })
             })
 
@@ -70,16 +119,11 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         })
         .catch((error) => {
             console.error('Error getting the response:', error);
-        });
-    }
+        });}
+    
 
-    // TODO: REMOVE AFTER INSTALLING NORMAL LOGIN
-
-    function delete_id_textarea() {
-        var id_area = document.getElementById('id_user');
-        id_area.style.display = 'none';
-        id_area.value = '';
-    }
+    
+    
 
   
     function hideHistory() {
@@ -100,7 +144,7 @@ document.getElementById('ai_update').addEventListener('click', function() {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: ID, responseText: text}),
+        body: JSON.stringify({ responseText: text}),
     })
     .then(response => response.text())
     .then(data => {
@@ -166,7 +210,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ aiInput: text, userId: ID }),
+            body: JSON.stringify({ aiInput: text}),
 
 
         })
@@ -188,7 +232,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userId: ID, responseText: text}),
+                    body: JSON.stringify({responseText: text}),
 
                 })
                 .then(response => response.text())
