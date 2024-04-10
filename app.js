@@ -295,7 +295,6 @@ app.post('/get_history', (req, res) => {
 
 
 function getRandomFactFromQuestionId(questionId) {
-function getRandomFactFromQuestionId(questionId) {
     const questions = loadQuestions();
     const question = questions.questions.find(q => q.id === questionId);
     if (!question) {
