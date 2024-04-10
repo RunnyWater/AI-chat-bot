@@ -295,8 +295,13 @@ app.post('/get_history', (req, res) => {
 
 
 function getRandomFactFromQuestionId(questionId) {
+function getRandomFactFromQuestionId(questionId) {
     const questions = loadQuestions();
     const question = questions.questions.find(q => q.id === questionId);
+    if (!question) {
+        // Handle the case where the question is not found, e.g., return a default value or an error message
+        return "Question not found";
+    }
     if (!question) {
         // Handle the case where the question is not found, e.g., return a default value or an error message
         return "Question not found";
@@ -370,6 +375,9 @@ function getWholeQuestionById(questionId) {
 
 
 function getQuestionIdByContent(query) {
+    if (typeof query !== 'string') {
+        return false;
+    }
     if (typeof query !== 'string') {
         return false;
     }
