@@ -1,16 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import path from 'path';
 import fs from 'fs';
 import Exa from 'exa-js';
-import { stringify } from 'querystring';
-import request from 'request';
-// require('dotenv').config();
-
-// loadEnv.js
 import dotenv from 'dotenv';
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcrypt';
+import session from 'express-session';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 dotenv.config();
-
 
 
 const app = express();
@@ -18,8 +16,17 @@ const api_key_exa =  process.env.API_KEY_EXA;
 const api_key_ninja = process.env.API_KEY_NINJA;
 const exa = new Exa(api_key_exa);
 
+const SECRET_KEY = crypto.randomBytes(64).toString('hex');
 
-async function sendDetailedQueryToExa(query, userId) {
+var userId = "0";
+var global_username = '';
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+   }));
+
+async function sendDetailedQueryToExa(query) {
     try {
         const textContentsResults = await exa.searchAndContents(query, {
             numResults:1,
@@ -36,14 +43,185 @@ async function sendDetailedQueryToExa(query, userId) {
 
 app.use(express.static('public'));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+const connection_string = process.env.CONNECTION_STRING;
+
+
+
+const client = new MongoClient(connection_string);
+let db
+let user_count;
+async function connectToDatabase() {
+  try {
+     await client.connect();
+     console.log('Connected to MongoDB');
+     db = client.db('ai_extension'); // Specify your database name
+    //  console.log(db.admin());
+     user_count = await getUserCount();
+  } catch (err) {
+    console.error("Error connecting to MongoDB:", err);
+  }
+}
+
+async function getUserCount() {
+  try {
+    const count = await db.collection('users').countDocuments();
+    return count;
+  } catch (error) {
+      console.error("Error getting user count:", error);
+  }
+}
+
+connectToDatabase();
+
+app.post('/register', async (req, res) => {
+    const { username, password, email } = req.body;
+    console.log('register', username, password, email);
+    if (await usernameExists(username)) {
+      console.log("Username already exists");
+      res.send("1");
+    }else if (await emailExists(email)) {
+      console.log("Email already exists");
+      res.send("2");
+      
+    }else{// Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try{
+        await db.collection('users').insertOne({ user_id : parseInt(user_count+1), username, password: hashedPassword, email });
+      }
+    catch{
+      "-1"
+    }
+    console.log('User registered successfully');
+    user_count++;
+    makeNewUser(username, password);
+    res.send("0");
+    }
+  });
+  
+  function makeNewUser() {
+    // Load existing users
+    const users = loadUsers();
+
+    // Generate a new user ID
+    const newUserId = users.users.length > 0 ? Math.max(...users.users.map(user => parseInt(user.userId))) + 1 : 1;
+
+    // Create a new user object with an empty questionsId array
+    const newUser = {
+        userId: newUserId.toString(), // Ensure userId is a string to match the existing structure
+        questionsId: []
+    };
+
+    // Add the new user to the list of users
+    users.users.push(newUser);
+
+    // Save the updated list of users back to the file
+    saveUsers(users);
+
+    console.log(`New user with ID ${newUserId} created.`);
+}
+
+  async function getIdByUsername(username) {
+    try {
+       const user = await db.collection('users').findOne({ username });
+       if (user) {
+         return user.user_id.toString(); // Assuming user_id is the field you want to return
+       } else {
+         return "User not found"; // Return a specific error message or code
+       }
+    } catch (error) {
+       console.error("Error getting user ID:", error);
+       throw error; // Rethrow the error to be handled by the caller
+    }
+   }
+
+  async function usernameExists(username) {
+    try {
+       const user = await db.collection('users').findOne({ username });
+       return user !== null;
+    } catch (error) {
+       console.error("Error checking username:", error);
+       throw error; // Rethrow the error to be handled by the caller
+    }
+   }
+   
+   async function emailExists(email) {
+    try {
+       const user = await db.collection('users').findOne({ email });
+       return user !== null;
+    } catch (error) {
+       console.error("Error checking email:", error);
+       throw error; // Rethrow the error to be handled by the caller
+    }
+   }
+  
+  // Login route
+  app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    console.log('login', username, password);
+   
+    if (!usernameExists(username)){
+      return res.send("1");
+    }
+    const user = await db.collection('users').findOne({ username });
+   try {
+      // Wrap bcrypt.compare in a Promise
+      const isMatch = await new Promise((resolve, reject) => {
+        bcrypt.compare(password, user.password, (err, result) => {
+          if (err) {
+            reject(err); // Reject the promise if there's an error
+          } else {
+            resolve(result); // Resolve the promise with the result
+          }
+        });
+      });
+  
+      if (isMatch) {
+        userId = await getIdByUsername(username);
+        global_username = username;
+        console.log(userId, global_username);
+        
+        // Generate the token before sending the response
+        const token = jwt.sign({ username: req.body.username }, SECRET_KEY, { expiresIn: '24h' });
+        // Set the token as a HttpOnly cookie
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict' });
+
+        // Now send the response
+        return res.send("0");
+      } else {
+        return res.send("1");
+      }
+   } catch (error) {
+      console.error(error);
+      return res.send("1");
+   }
+});
+  
+app.get('/check_login', (req, res) => {
+    console.log(global_username);
+    if (userId === "0") {
+        res.send("0");
+    }
+    else {
+        res.send(global_username);
+    }
+   
+})
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
   });
 
 
+app.get('/login', (req, res) => {
+    res.send(fs.readFileSync('./views/login.html', 'utf8'));
+});
 
-
+app.get('/register', (req, res) => {
+    res.send(fs.readFileSync('./views/register.html', 'utf8'));
+})
 
 async function getNewRandomFact() {
   const url = 'https://api.api-ninjas.com/v1/facts?limit=1';
@@ -71,7 +249,6 @@ async function getNewRandomFact() {
 
 app.post('/get_answer', (req, res) => {
     const question = req.body.question;
-    const userId = req.body.userId;
     const id = getQuestionIdByContent(question);
     if(question===undefined){
         console.log("No question found")
@@ -86,21 +263,19 @@ app.post('/get_answer', (req, res) => {
 
 app.post('/ai_answer', (req, res) => {
     const query = req.body.aiInput;
-    const UserId = req.body.userId;
     const id = getQuestionIdByContent(query);
 
     if (id){
-        addQuestionIdToUser(UserId,id);
-        let answer = [getResponseByUserIdAndQuestionId(UserId, id), getRandomFactFromQuestionId(id)];
+        addQuestionIdToUser(userId,id);
+        let answer = [getResponseByUserIdAndQuestionId(userId, id), getRandomFactFromQuestionId(id)];
         res.send(answer);
     }else{
-        let answer = [sendDetailedQueryToExa(query, UserId), getNewRandomFact()]
+        let answer = [sendDetailedQueryToExa(query, userId), getNewRandomFact()]
         res.send(answer);
     }
 });
 
 app.post('/ai_update', (req, res) => {
-    const userId = req.body.userId;
     const responseText = req.body.responseText;
     const questionId = getQuestionIdByContent(responseText);
     let newResponse = getNextResponse(userId, questionId);
@@ -110,11 +285,11 @@ app.post('/ai_update', (req, res) => {
 
 
 app.post('/get_history', (req, res) => {
-    const UserId = req.body.userId;
-    if (parseInt(UserId)===0){
+    console.log(userId)
+    if (parseInt(userId)===0){
         return res.send('0');
     }
-    const questionHistory = getUserQuestionHistory(UserId);
+    const questionHistory = getUserQuestionHistory(userId);
     res.send(questionHistory);
 });
 
@@ -291,3 +466,46 @@ function saveQuestions(questions) {
     const data = JSON.stringify(questions, null, 2);
     fs.writeFileSync('public/history/questions.json', data);
 }
+
+
+app.post('/logout', (req, res) => {
+    global_username = '';
+    userId = '0';
+    res.clearCookie('token'); // Clear the token cookie
+    res.sendStatus(200); // Send a success status
+});
+
+function logout() {
+    // Remove the token from local storage
+    localStorage.removeItem('token');
+
+    // Optionally, make a request to the server to invalidate the token
+    fetch('/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Redirect the user to the login page or homepage
+        window.location.href = '/login'; // Adjust the URL as necessary
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+app.use((req, res, next) => {
+    const token = req.cookies.token;
+
+    if (token == null) return res.sendStatus(401); // if there isn't any token
+
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+});

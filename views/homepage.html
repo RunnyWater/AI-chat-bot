@@ -8,13 +8,14 @@
     <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
-    <textarea type="text" id="id_user"></textarea>
     <div class="wrapper">
         <div id="historyContainer">
             <button id="showHistoryButton" class="title__general">History</button>
             <article class="history scrollbar__general" id="historyList" style="display: none" >
                 <ul class="history__list flex__general list__general" id="history">
                     <li class=" title__general"><span class="history__info" id="history_label">History</span></li>
+                    <li><a href="/" class=" reset-link">New Question</a></li>
+                    <br>
                     <div id="question__div" class="question__div">
                     </div>
                 </ul>
@@ -58,7 +59,10 @@
             </div>
         </section>
         <div class="api">
-            <button class="ai__login title__general">Sing in</button>
+            <button class="ai__login title__general" id="login_button"><a href="login" style="color: white;">Sing in</a></button>
+            <div class="logged_in_box" id="user_logged_in">
+                
+            </div>
             <div class="ai__twoapi">
                 <div id="random__fact__label" style="display: none;">
                     <span class="badge bg-dark-orange mb-2">Random fact</span>
