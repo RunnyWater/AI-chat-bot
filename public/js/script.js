@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if(confirm("Are you sure you want to log out?")){
                         logout()
+                        history_opened= false
                     }else{
                         
                     }
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Make a request to the server's logout endpoint
                         fetch('/logout', {
                             method: 'POST',
+                            credentials: 'include',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
@@ -64,22 +66,26 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     // console.log("ebat")
     if (!history_opened) {
 
-        fetch('/get_history', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        fetch('/get_history')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json();
         })
-        .then(response => response.json())
         .then(data => {
-            console.log(data)
-            if (data === 0) {
+            // console.log(data)
+            if (data === "0") {
                 document.getElementById('history_label').innerHTML = "Please log in";
-                return;
-            }
+            }else{
+                
             let questionHistoryHtml = '';
             data.forEach(item => {
-                questionHistoryHtml += `<li class="history__items" ><button class="history__button" id="${item}">${item}</button></li>`;
+                questionHistoryHtml += `<li class="history__items" >
+                <button class="history__button" id="${item}">${item}</button>
+                <button class="transparent delete__history__item delete__history__item__image" id="delete_${item}">
+                </button>
+                </li>`;
             });
             history_opened = true;
 
@@ -89,6 +95,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                 document.getElementById(item).addEventListener('click', function() {        
                     fetch('/get_answer', {
                         method: 'POST',
+                        credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -115,7 +122,40 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                 })
             })
 
+            data.forEach(item => {
+                document.getElementById(`delete_${item}`).addEventListener('click', function() {
+                    fetch('/delete_history', {
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ question: item }),
+                    })
+                    .then(response =>{
+                        // console.log(response);
+                         response.json()
+                        })
+                    
+                    .then(data => {
+                        // console.log(data)
+                        // Remove the deleted item from the UI
+                        const itemElement = document.getElementById(`${item}`).parentElement;
+                        itemElement.remove(); // Remove the item from the UI
+                        
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting question from history:', error);
+                        if (error.response) {
+                            error.response.text().then(text => console.log(text));
+                        } else {
+                            console.log('Error message:', error.message);
+                        }
+                    });
+                });
+            })
 
+            }
         })
         .catch((error) => {
             console.error('Error getting the response:', error);
@@ -136,15 +176,14 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
 });
 
 document.getElementById('ai_update').addEventListener('click', function() {
-    const textarea = document.getElementById('multilineInput');
-    const text = textarea.value; 
+    const textarea = document.getElementById('ai_user_search').innerText;
 
     fetch('/ai_update', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ responseText: text}),
+        body: JSON.stringify({ responseText: textarea}),
     })
     .then(response => response.text())
     .then(data => {
@@ -153,7 +192,9 @@ document.getElementById('ai_update').addEventListener('click', function() {
     })
     .catch((error) => {
         console.error('Error updating the response:', error);
-    })});
+    })
+
+});
 
 
 
@@ -207,6 +248,7 @@ document.getElementById('ai_submit').addEventListener('click', function() {
         fetch('/ai_answer', {
 
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -216,7 +258,10 @@ document.getElementById('ai_submit').addEventListener('click', function() {
         })
         .then(response => response.json())
         .then(data => {
-            let [answerElementValue, randomFactValue] = data;
+            let answerElementValue= data[0];
+            // console.log(answerElementValue)
+            let randomFactValue = data[1];
+            // console.log(randomFactValue)
             document.getElementById('ai_user_search').innerText = text;
             // delete_textarea();
             document.getElementById('ai__search').style.display = 'none';
@@ -228,7 +273,8 @@ document.getElementById('ai_submit').addEventListener('click', function() {
             document.getElementById('random__fact').innerText = randomFactValue;
             document.getElementById('ai_update').addEventListener('click', function() {
                 fetch('/ai_update', {
-                    method: 'POST',
+                    method: 'PATCH',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
