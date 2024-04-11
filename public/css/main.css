@@ -273,11 +273,47 @@ body {
     padding-top: 50px;
     position: relative;
 }
+
+.transparent{
+    background: transparent;
+}
+
+
+.delete__history__item__image,
+.delete__history__item__image:hover,
+.delete__history__item__image:focus,
+.delete__history__item__image::before,
+.delete__history__item__image::after {
+    border: none;
+    box-shadow: none;
+    outline: none;
+    background-image: url('../images/delete.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.delete__history__item__image,
+.delete__history__item{
+    width: 25px;
+    height: 25px;
+    margin-left: 25px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: all 0.1s linear;
+
+}
+
+.delete__history__item__image:hover{
+    background-image: url(../images/delete_hover.png);
+}
+
 .history__info{
     color: rgb(228, 205, 205);
 }
 .history__items{
+    display: flex;
     left: 1em;
+    align-items: center;
     width: 300px;
     font-size: 20px;
     color: rgb(155, 155, 155);

@@ -8,23 +8,27 @@ import bcrypt from 'bcrypt';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import cookieParser from 'cookie-parser'
 dotenv.config();
 
-
 const app = express();
+
+app.use(cookieParser());
 const api_key_exa =  process.env.API_KEY_EXA;
 const api_key_ninja = process.env.API_KEY_NINJA;
 const exa = new Exa(api_key_exa);
-
 const SECRET_KEY = crypto.randomBytes(64).toString('hex');
 
+var random_fact = '';
 var userId = "0";
 var global_username = '';
 app.use(session({
     secret: 'secret',
     resave: true,
     saveUninitialized: true
-   }));
+}));
+
+
 
 async function sendDetailedQueryToExa(query) {
     try {
@@ -32,10 +36,13 @@ async function sendDetailedQueryToExa(query) {
             numResults:1,
             highlights: { highlightsPerUrl: 5 }
           });
+        //   console.log(textContentsResults)
           textContentsResults.results.forEach(result => {
             addNewQuestion(userId, result.id, query, result.highlights);
-            return result.highlights[0];
+            
+
         });
+        return textContentsResults.results[0]?.highlights[0];
     } catch (error) {
         console.error('Error sending detailed query to Exa:', error);
     }
@@ -200,7 +207,7 @@ app.post('/register', async (req, res) => {
 });
   
 app.get('/check_login', (req, res) => {
-    console.log(global_username);
+    // console.log(global_username);
     if (userId === "0") {
         res.send("0");
     }
@@ -224,27 +231,25 @@ app.get('/register', (req, res) => {
 })
 
 async function getNewRandomFact() {
-  const url = 'https://api.api-ninjas.com/v1/facts?limit=1';
+    const url = 'https://api.api-ninjas.com/v1/facts?limit=1';
     const options = {
-    method: 'GET',
-    headers: {
-        'X-Api-Key': api_key_ninja // Replace 'YOUR_API_KEY' with your actual API key
-    }
+        method: 'GET',
+        headers: {
+            'X-Api-Key': api_key_ninja // Replace 'YOUR_API_KEY' with your actual API key
+        }
     };
 
-  fetch(url, options)
-  .then(response => {
-      if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-  })
-  .then(data => {
-        return data;
-  })
-  .catch(error => {
-      console.error('There was a problem with the fetch operation:', error);
-  });
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data[0].fact; // Return the fact
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+        return ''; // Return an empty string or handle the error as needed
+    }
 }
 
 app.post('/get_answer', (req, res) => {
@@ -261,36 +266,52 @@ app.post('/get_answer', (req, res) => {
 
 
 
-app.post('/ai_answer', (req, res) => {
+app.post('/ai_answer', async (req, res) => {
     const query = req.body.aiInput;
     const id = getQuestionIdByContent(query);
 
-    if (id){
-        addQuestionIdToUser(userId,id);
+    if (id) {
+        addQuestionIdToUser(userId, id);
         let answer = [getResponseByUserIdAndQuestionId(userId, id), getRandomFactFromQuestionId(id)];
         res.send(answer);
-    }else{
-        let answer = [sendDetailedQueryToExa(query, userId), getNewRandomFact()]
-        res.send(answer);
+    } else {
+        try {
+            random_fact = await getNewRandomFact(); // Await the completion of the fetch operation
+            // Assuming sendDetailedQueryToExa now returns a Promise that resolves to the desired value
+            const detailedQueryResult = await sendDetailedQueryToExa(query);
+            let answer = [detailedQueryResult, random_fact];
+            res.send(answer);
+            random_fact = '';
+        } catch (error) {
+            console.error('Error fetching random fact or sending detailed query:', error);
+            res.sendStatus(500); // Send a server error response
+        }
     }
 });
 
-app.post('/ai_update', (req, res) => {
+app.patch('/ai_update', (req, res) => {
     const responseText = req.body.responseText;
+    // console.log(responseText)
     const questionId = getQuestionIdByContent(responseText);
     let newResponse = getNextResponse(userId, questionId);
+    // console.log(newResponse);
     res.send(newResponse);
 
 });
 
 
-app.post('/get_history', (req, res) => {
-    console.log(userId)
+app.get('/get_history', (req, res) => {
+    try
+    { console.log(userId)
     if (parseInt(userId)===0){
-        return res.send('0');
+        return res.json('0');
     }
     const questionHistory = getUserQuestionHistory(userId);
-    res.send(questionHistory);
+    res.json(questionHistory);
+    } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+}
 });
 
 
@@ -412,16 +433,17 @@ function addQuestionIdToUser(userId, questionId) {
 
 
 function addNewQuestion(userId, id, question, responses) {
+    // console.log(userId, id, question, responses)
     const users = loadUsers();
     const questions = loadQuestions();
-
     // Add the new question to the questions list
     const newQuestionId = id;
+    // console.log(random_fact);
     questions.questions.push({
         id: newQuestionId,
         question,
         responses,
-        fact: getNewRandomFact()
+        fact: random_fact
     });
     saveQuestions(questions);
 
@@ -482,32 +504,9 @@ app.post('/logout', (req, res) => {
     res.sendStatus(200); // Send a success status
 });
 
-function logout() {
-    // Remove the token from local storage
-    localStorage.removeItem('token');
-
-    // Optionally, make a request to the server to invalidate the token
-    fetch('/logout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        // Redirect the user to the login page or homepage
-        window.location.href = '/login'; // Adjust the URL as necessary
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-    });
-}
-
 app.use((req, res, next) => {
-    const token = req.cookies.token;
-
+    console.log('Cookies:', req.cookies); // Log the cookies to see if they're being parsed
+    const token = req.cookies?.token ?? null;
     if (token == null) return res.sendStatus(401); // if there isn't any token
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
@@ -515,4 +514,54 @@ app.use((req, res, next) => {
         req.user = user;
         next();
     });
+});
+
+async function loadUserById(userId) {
+    // Load user data from your database
+    // This is a placeholder implementation; replace it with your actual database logic
+    const users = loadUsers(); // Assuming this function loads all users
+    return users.users.find(user => user.userId === userId);
+}
+
+async function saveUser(user) {
+    // Save the updated user data back to your database
+    // This is a placeholder implementation; replace it with your actual database logic
+    const users = loadUsers(); // Load all users
+    const index = users.users.findIndex(u => u.userId === user.userId);
+    if (index !== -1) {
+        users.users[index] = user; // Update the user data
+        saveUsers(users); // Save the updated list of users
+    }
+}
+
+app.delete('/delete_history', async (req, res) => {
+    // res.status(200).send({ message: 'DELETE request received' });
+    const question  = req.body.question ;
+    // Assuming you have a way to identify the current user, e.g., through a session or token
+
+    try {
+        // Load the current user's data
+        const user = await loadUserById(userId);
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+        const question_id = getQuestionIdByContent(question);
+        // Find the index of the question in the user's history
+        const questionIndex = user.questionsId.findIndex(q => q[0] === question_id);
+        if (questionIndex === -1) {
+            return res.status(404).send({ error: 'Question not found in user history' });
+        }
+
+        // Remove the question from the user's history
+        user.questionsId.splice(questionIndex, 1);
+
+        // Save the updated user data
+        await saveUser(user);
+
+        // Send a success response
+        // res.sendStatus(200);
+    } catch (error) {
+        console.error('Error deleting question from history:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
 });

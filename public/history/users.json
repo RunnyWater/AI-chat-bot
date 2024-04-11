@@ -6,26 +6,6 @@
         [
           "MrYwNib9FbK-ED4T_5jH6Q",
           0
-        ],
-        [
-          "GNa9A_KGnu1VtlWmuP_ugA",
-          0
-        ],
-        [
-          "71uijPA2GCtpAOIeriwzXA",
-          0
-        ],
-        [
-          "Mee3hDVtiE4-z6PI-hC6wg",
-          0
-        ],
-        [
-          "7h6EE9A0XKRNxcOlKdtxDQ",
-          0
-        ],
-        [
-          "uOmMgIcxVRsHViVPWYxtCw",
-          0
         ]
       ]
     },
@@ -33,66 +13,12 @@
       "userId": "1",
       "questionsId": [
         [
-          "MrYwNib9FbK-ED4T_5jH6Q",
-          2
-        ],
-        [
-          "71uijPA2GCtpAOIeriwzXA",
-          2
-        ],
-        [
-          "GNa9A_KGnu1VtlWmuP_ugA",
-          0
-        ],
-        [
-          "7h6EE9A0XKRNxcOlKdtxDQ",
-          3
-        ],
-        [
-          "uOmMgIcxVRsHViVPWYxtCw",
-          0
-        ]
-      ]
-    },
-    {
-      "userId": "2",
-      "questionsId": [
-        [
-          "GNa9A_KGnu1VtlWmuP_ugA",
-          0
-        ],
-        [
-          "71uijPA2GCtpAOIeriwzXA",
-          4
-        ],
-        [
-          "Mee3hDVtiE4-z6PI-hC6wg",
-          0
-        ],
-        [
-          "MrYwNib9FbK-ED4T_5jH6Q",
+          "1i58cqTL9XgemtiOepGftw",
           1
         ],
         [
-          "mfi4ah51Ti-OpSqil4HzKA",
+          "MrYwNib9FbK-ED4T_5jH6Q",
           0
-        ],
-        [
-          "uOmMgIcxVRsHViVPWYxtCw",
-          0
-        ],
-        [
-          "ofFRVktfnBHMwSO9O55I-A",
-          4
-        ]
-      ]
-    },
-    {
-      "userId": "3",
-      "questionsId": [
-        [
-          "7h6EE9A0XKRNxcOlKdtxDQ",
-          2
         ]
       ]
     }
