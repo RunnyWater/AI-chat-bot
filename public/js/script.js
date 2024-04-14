@@ -63,9 +63,8 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     setTimeout(function() {
         hideHistoryButton.style.opacity = '1'; 
     }, 10); // Delay in milliseconds
-    // console.log("ebat")
-    if (!history_opened) {
 
+    if (!history_opened) {
         fetch('/get_history')
         .then(response => {
             if (!response.ok) {
@@ -74,102 +73,106 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
             return response.json();
         })
         .then(data => {
-            // console.log(data)
             if (data === "0") {
                 document.getElementById('history_label').innerHTML = "Please log in";
-            }else{
-                
-            let questionHistoryHtml = '';
-            data.forEach(item => {
-                questionHistoryHtml += `<li class="history__items" >
-                <button class="history__button" id="${item}">${item}</button>
-                <button class="transparent delete__history__item delete__history__item__image" id="delete_${item}">
-                </button>
-                </li>`;
-            });
-            history_opened = true;
+            } else {
+                // Clear existing history
+                document.getElementById('question__div').innerHTML = '';
 
-            let history = document.getElementById('question__div');
-            history.innerHTML += questionHistoryHtml;
-            data.forEach(item => {
-                document.getElementById(item).addEventListener('click', function() {        
-                    fetch('/get_answer', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ question: item}),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        let [text, answerElementValue, randomFactValue] = data;
-                        
-                        document.getElementById('ai_user_search').innerText = text;
-                        // delete_textarea();
-                        document.getElementById('ai__search').style.display = "none";
-                        document.getElementById('ai__answer').innerText = answerElementValue;
-                        document.getElementById('ai_answer_list').style.display = "block";
-                        // RANDOM FACT
-                        document.getElementById('random__fact__label').style.display = "block";
-                        document.getElementById('random__fact').innerText = randomFactValue;
-                        
-                                })
-                    .catch((error) => {
-                        console.error('Error getting the response:', error);
-                    })
-
-                })
-            })
-
-            data.forEach(item => {
-                document.getElementById(`delete_${item}`).addEventListener('click', function() {
-                    fetch('/delete_history', {
-                        method: 'DELETE',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ question: item }),
-                    })
-                    .then(response =>{
-                        // console.log(response);
-                         response.json()
-                        })
-                    
-                    .then(data => {
-                        // console.log(data)
-                        // Remove the deleted item from the UI
-                        const itemElement = document.getElementById(`${item}`).parentElement;
-                        itemElement.remove(); // Remove the item from the UI
-                        
-                    })
-                    .catch((error) => {
-                        console.error('Error deleting question from history:', error);
-                        if (error.response) {
-                            error.response.text().then(text => console.log(text));
-                        } else {
-                            console.log('Error message:', error.message);
+                // Process each category
+                Object.keys(data).forEach(category => {
+                    // Check if the category has any questions
+                    if (data[category].length > 0) {
+                        // Create a container for the category if it doesn't exist
+                        let categoryContainer = document.getElementById(`${category}Container`);
+                        if (!categoryContainer) {
+                            categoryContainer = document.createElement('div');
+                            categoryContainer.id = `${category}Container`;
+                            categoryContainer.className = 'categoryContainer'; // Add a class for styling
+                            document.getElementById('question__div').appendChild(categoryContainer);
                         }
-                    });
-                });
-            })
 
+                        // Add a title for the category
+                        const categoryTitle = document.createElement('h3');
+                        categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1); // Capitalize the first letter
+                        categoryContainer.appendChild(categoryTitle);
+
+                        // Process each question in the category
+                        data[category].forEach(question => {
+                            // Create the question HTML
+                            const questionItem = document.createElement('li');
+                            questionItem.className = 'history__items';
+                            questionItem.innerHTML = `
+                                <button class="history__button" id="${question}">${question}</button>
+                                <button class="transparent delete__history__item delete__history__item__image" id="delete_${question}"></button>
+                            `;
+                            categoryContainer.appendChild(questionItem);
+
+                            // Add event listener for question click
+                            document.getElementById(question).addEventListener('click', function() {
+                                fetch('/get_answer', {
+                                    method: 'POST',
+                                    credentials: 'include',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ question: question }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    let [text, answerElementValue, randomFactValue] = data;
+                                    document.getElementById('ai_user_search').innerText = text;
+                                    document.getElementById('ai__search').style.display = "none";
+                                    document.getElementById('ai__answer').innerText = answerElementValue;
+                                    document.getElementById('ai_answer_list').style.display = "block";
+                                    document.getElementById('random__fact__label').style.display = "block";
+                                    document.getElementById('random__fact').innerText = randomFactValue;
+                                })
+                                .catch((error) => {
+                                    console.error('Error getting the response:', error);
+                                });
+                            });
+
+                            // Add event listener for delete click
+                            document.getElementById(`delete_${question}`).addEventListener('click', function() {
+                                fetch('/delete_history', {
+                                    method: 'DELETE',
+                                    credentials: 'include',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ question: question }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Remove the deleted item from the UI
+                                    const itemElement = document.getElementById(`${question}`).parentElement;
+                                    itemElement.remove(); // Remove the item from the UI
+                                })
+                                .catch((error) => {
+                                    console.error('Error deleting question from history:', error);
+                                    if (error.response) {
+                                        error.response.text().then(text => console.log(text));
+                                    } else {
+                                        console.log('Error message:', error.message);
+                                    }
+                                });
+                            });
+                        });
+                    }
+                });
+
+                history_opened = true;
             }
         })
         .catch((error) => {
             console.error('Error getting the response:', error);
-        });}
-    
+        });
+    }
 
-    
-    
-
-  
     function hideHistory() {
         const historyList = document.getElementById('historyList');
         historyList.style.display = 'none';
-
         const hideHistoryButton = document.getElementById('hideHistoryButton');
         hideHistoryButton.parentNode.removeChild(hideHistoryButton);
     }
