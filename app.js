@@ -340,16 +340,52 @@ function getUserQuestionHistory(userId) {
     if (!user) {
         return { error: 'User not found' };
     }
+    console.log(user)
+    // Initialize categories
+    const categories = {
+        today: [],
+        yesterday: [],
+        "last 7 Days": [],
+        older: []
+    };
 
-    // Fetch the user's question history
-    const questionHistory = user.questionsId.map(qId => {
+    // Get today's date
+    const date = new Date();
+    const today = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+    const partsToday = today.split("-");
+    const dateToday = new Date(`${partsToday[1]}/${partsToday[0]}/${partsToday[2]}`);
+    // Fetch the user's question history and categorize them
+    user.questionsId.forEach(qId => {
         const question = questions.questions.find(q => q.id === qId[0]);
         if (!question) {
-            return null; // This should not happen, but it's a safeguard
+            return; // Skip if question not found
         }
-        return question.question;
-    }).filter(item => item !== null); // Filter out any null items
-    return questionHistory;
+        
+        // Convert the given date string into a Date object
+        const dateString = qId[2];
+        const parts = dateString.split("-");
+        const questionDate = new Date(parts);
+        const formattedDate = `${questionDate.getMonth()+1}-${questionDate.getDate()}-${questionDate.getFullYear()}`;
+        const partsFormattedDate = formattedDate.split("-");
+        const dateFormattedDate = new Date(`${partsFormattedDate[1]}/${partsFormattedDate[0]}/${partsFormattedDate[2]}`);
+        // Calculate the difference in milliseconds
+        const diffInMilliseconds = dateToday - dateFormattedDate;
+
+        // Convert the difference from milliseconds to days
+        const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+        // Categorize the question based on its date
+        if (diffInDays === 0) {
+            categories.today.push(question.question);
+        } else if (diffInDays === 1) {
+            categories.yesterday.push(question.question);
+        } else if (diffInDays <= 7) {
+            categories.lastWeek.push(question.question);
+        } else {
+            categories.older.push(question.question);
+        }
+    });
+
+    return categories;
 }
 
 app.get('/', (req, res) => { 
@@ -417,9 +453,13 @@ function addQuestionIdToUser(userId, questionId) {
     if (user) {
         // Check if the questionId is already in the user's questionsId array
         if (!user.questionsId.some(qId => qId[0] === questionId)) {
-            // Add the questionId to the user's questionsId array
-            user.questionsId.push([questionId, 0]); // Assuming the initial response index is 0
-            console.log(`Question ID ${questionId} added to user ${userId}.`);
+            // Generate a timestamp for the current date and time
+            const date = new Date();
+            const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+            
+            // Add the questionId, initial response index, and timestamp to the user's questionsId array
+            user.questionsId.push([questionId, 0, formattedDate]); // Assuming the initial response index is 0
+            console.log(`Question ID ${questionId} added to user ${userId} on ${formattedDate}.`);
         } else {
             console.log(`User ${userId} already has question ID ${questionId}.`);
         }

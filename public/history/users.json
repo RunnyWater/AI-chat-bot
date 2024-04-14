@@ -2,23 +2,20 @@
   "users": [
     {
       "userId": "0",
-      "questionsId": [
-        [
-          "MrYwNib9FbK-ED4T_5jH6Q",
-          0
-        ]
-      ]
+      "questionsId": []
     },
     {
       "userId": "1",
       "questionsId": [
         [
-          "1i58cqTL9XgemtiOepGftw",
-          1
+          "MrYwNib9FbK-ED4T_5jH6Q",
+          0,
+          "11-4-2024"
         ],
         [
-          "MrYwNib9FbK-ED4T_5jH6Q",
-          0
+          "1i58cqTL9XgemtiOepGftw",
+          2,
+          "10-4-2024"
         ]
       ]
     }
