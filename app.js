@@ -340,7 +340,7 @@ function getUserQuestionHistory(userId) {
     if (!user) {
         return { error: 'User not found' };
     }
-    console.log(user)
+
     // Initialize categories
     const categories = {
         today: [],
@@ -349,37 +349,29 @@ function getUserQuestionHistory(userId) {
         older: []
     };
 
-    // Get today's date
-    const date = new Date();
-    const today = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-    const partsToday = today.split("-");
-    const dateToday = new Date(`${partsToday[1]}/${partsToday[0]}/${partsToday[2]}`);
+    // Get today's date at the start of the day in UTC
+    const today = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()));
+
     // Fetch the user's question history and categorize them
     user.questionsId.forEach(qId => {
         const question = questions.questions.find(q => q.id === qId[0]);
         if (!question) {
             return; // Skip if question not found
         }
-        
-        // Convert the given date string into a Date object
-        const dateString = qId[2];
-        const parts = dateString.split("-");
-        const questionDate = new Date(parts);
-        const formattedDate = `${questionDate.getMonth()+1}-${questionDate.getDate()}-${questionDate.getFullYear()}`;
-        const partsFormattedDate = formattedDate.split("-");
-        const dateFormattedDate = new Date(`${partsFormattedDate[1]}/${partsFormattedDate[0]}/${partsFormattedDate[2]}`);
-        // Calculate the difference in milliseconds
-        const diffInMilliseconds = dateToday - dateFormattedDate;
 
-        // Convert the difference from milliseconds to days
-        const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+        // Convert the given date string into a Date object in UTC
+        const questionDate = new Date(Date.UTC(qId[2].split('-')[2], qId[2].split('-')[1] - 1, qId[2].split('-')[0]));
+
+        // Calculate the difference in days
+        const diffInDays = Math.floor((today - questionDate) / (1000 * 60 * 60 * 24));
+
         // Categorize the question based on its date
         if (diffInDays === 0) {
             categories.today.push(question.question);
         } else if (diffInDays === 1) {
             categories.yesterday.push(question.question);
         } else if (diffInDays <= 7) {
-            categories.lastWeek.push(question.question);
+            categories["last 7 Days"].push(question.question);
         } else {
             categories.older.push(question.question);
         }
