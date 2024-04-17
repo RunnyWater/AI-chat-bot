@@ -9,13 +9,26 @@ import session from 'express-session';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import cookieParser from 'cookie-parser'
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 dotenv.config();
 
 const app = express();
 
 app.use(cookieParser());
+// Get you api-key at https://exa.ai/
 const api_key_exa =  process.env.API_KEY_EXA;
+// Get you api-key at https://api-ninjas.com/api
 const api_key_ninja = process.env.API_KEY_NINJA;
+// Make and put your collection name
+const collection_name = 'ai_extension';
+// Get a connection string to this collection
+const connection_string = process.env.CONNECTION_STRING;
 const exa = new Exa(api_key_exa);
 const SECRET_KEY = crypto.randomBytes(64).toString('hex');
 
@@ -28,6 +41,14 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.get('/', (req, res) => { 
+    res.send(fs.readFileSync('./views/homepage.html', 'utf8'));
+});
 
 
 async function sendDetailedQueryToExa(query) {
@@ -48,23 +69,17 @@ async function sendDetailedQueryToExa(query) {
     }
 }
 
-app.use(express.static('public'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-const connection_string = process.env.CONNECTION_STRING;
 
 
 
 const client = new MongoClient(connection_string);
-let db
+let db;
 let user_count;
 async function connectToDatabase() {
   try {
      await client.connect();
      console.log('Connected to MongoDB');
-     db = client.db('ai_extension'); // Specify your database name
+     db = client.db(collection_name); // Specify your database name
     //  console.log(db.admin());
      user_count = await getUserCount();
   } catch (err) {
@@ -217,10 +232,6 @@ app.get('/check_login', (req, res) => {
    
 })
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-  });
-
 
 app.get('/login', (req, res) => {
     res.send(fs.readFileSync('./views/login.html', 'utf8'));
@@ -291,10 +302,8 @@ app.post('/ai_answer', async (req, res) => {
 
 app.patch('/ai_update', (req, res) => {
     const responseText = req.body.responseText;
-    // console.log(responseText)
     const questionId = getQuestionIdByContent(responseText);
     let newResponse = getNextResponse(userId, questionId);
-    // console.log(newResponse);
     res.send(newResponse);
 
 });
@@ -318,10 +327,6 @@ app.get('/get_history', (req, res) => {
 function getRandomFactFromQuestionId(questionId) {
     const questions = loadQuestions();
     const question = questions.questions.find(q => q.id === questionId);
-    if (!question) {
-        // Handle the case where the question is not found, e.g., return a default value or an error message
-        return "Question not found";
-    }
     if (!question) {
         // Handle the case where the question is not found, e.g., return a default value or an error message
         return "Question not found";
@@ -380,9 +385,6 @@ function getUserQuestionHistory(userId) {
     return categories;
 }
 
-app.get('/', (req, res) => { 
-    res.send(fs.readFileSync('./views/homepage.html', 'utf8'));
-});
 
 
 function getResponseByUserIdAndQuestionId(userId, questionId) {
@@ -412,13 +414,6 @@ function getResponseByUserIdAndQuestionId(userId, questionId) {
     const response = question.responses[responseIndex];
 
     return response;
-}
-
-
-function getWholeQuestionById(questionId) {
-    const questions = loadQuestions();
-    const question = questions.questions.find(q => q.id === questionId);
-    return question || null;
 }
 
 
@@ -536,6 +531,10 @@ app.post('/logout', (req, res) => {
     res.sendStatus(200); // Send a success status
 });
 
+app.use(function (req, res, next) {
+    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+});
+
 app.use((req, res, next) => {
     console.log('Cookies:', req.cookies); // Log the cookies to see if they're being parsed
     const token = req.cookies?.token ?? null;
@@ -547,6 +546,8 @@ app.use((req, res, next) => {
         next();
     });
 });
+
+
 
 async function loadUserById(userId) {
     // Load user data from your database
@@ -597,3 +598,9 @@ app.delete('/delete_history', async (req, res) => {
         res.status(500).send({ error: 'Internal server error' });
     }
 });
+
+
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+  });

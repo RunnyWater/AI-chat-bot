@@ -75,6 +75,8 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
         .then(data => {
             if (data === "0") {
                 document.getElementById('history_label').innerHTML = "Please log in";
+            }else if(data === ''){
+                
             } else {
                 // Clear existing history
                 document.getElementById('question__div').innerHTML = '';
