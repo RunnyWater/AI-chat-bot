@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('login_button').style.display= 'flex';
             }else{
                 document.getElementById('login_button').style.display= 'none';
-                document.getElementById('user_logged_in').innerHTML = `<img src="images/user_logged_in.png" class="icon__logout">
+                document.getElementById('user_logged_in').innerHTML = `<img src="images/user_logged_in.svg" class="icon__logout">
                 <span style="padding-left: 5px;" id="user_name"><button class="log_out__button" id="log_out">${data}</button></span>`
                 document.getElementById('log_out').addEventListener('click', function() {
 
