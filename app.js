@@ -26,7 +26,7 @@ const api_key_exa =  process.env.API_KEY_EXA;
 // Get you api-key at https://api-ninjas.com/api
 const api_key_ninja = process.env.API_KEY_NINJA;
 // Make and put your collection name
-const collection_name = 'ai_extension';
+const collection_name = process.env.COLLECTION_NAME;
 // Get a connection string to this collection
 const connection_string = process.env.CONNECTION_STRING;
 const exa = new Exa(api_key_exa);
@@ -242,21 +242,27 @@ app.get('/register', (req, res) => {
 })
 
 async function getNewRandomFact() {
-    const url = 'https://api.api-ninjas.com/v1/facts?limit=1';
+    const url = 'https://api.api-ninjas.com/v1/facts'; // Removed the limit parameter
     const options = {
         method: 'GET',
         headers: {
-            'X-Api-Key': api_key_ninja // Replace 'YOUR_API_KEY' with your actual API key
+            'X-Api-Key': api_key_ninja // Ensure this is correctly set
         }
     };
-
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+            // Attempt to log the response body for more details
+            const errorBody = await response.text();
+            console.error('Response body:', errorBody);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        return data[0].fact; // Return the fact
+        // Assuming the API returns an array of facts, pick the first one
+        const fact = data[0]?.fact;
+        console.log(fact);
+        return fact; // Return the fact
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
         return ''; // Return an empty string or handle the error as needed
