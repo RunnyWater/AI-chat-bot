@@ -25,8 +25,8 @@ app.use(cookieParser());
 const api_key_exa =  process.env.API_KEY_EXA;
 // Get you api-key at https://api-ninjas.com/api
 const api_key_ninja = process.env.API_KEY_NINJA;
-// Make and put your collection name
-const collection_name = process.env.COLLECTION_NAME;
+// Make and put your dataset name
+const DATASET_NAME = process.env.DATASET_NAME;
 // Get a connection string to this collection
 const connection_string = process.env.CONNECTION_STRING;
 const exa = new Exa(api_key_exa);
@@ -79,7 +79,7 @@ async function connectToDatabase() {
   try {
      await client.connect();
      console.log('Connected to MongoDB');
-     db = client.db(collection_name); // Specify your database name
+     db = client.db(DATASET_NAME); // Specify your database name
     //  console.log(db.admin());
      user_count = await getUserCount();
   } catch (err) {
