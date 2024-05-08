@@ -5,7 +5,7 @@
 ## Opis
 Nasz projekt to strona internetowa która zapewnia użytkownikom możliwość zadawania pytań na różnorodne tematy oraz otrzymywania szybkich odpowiedzi.
 
-![Entire screen](entire_test_screen.jpeg)
+![Entire screen](docs/entire_test_screen.jpeg)
 
 
 ### *W naszym projekcie są dostępne takie funkcjonalności*:
@@ -27,11 +27,11 @@ Dla zapisu danych logowania użytkowników wykorzystujemy bazę danych MongoDb[ 
 
 Dla zwiększenia bezpieczeństwa użytkowników użyliśmy też Cookie JWT token do autoryzacji, weryfikacji haseł oraz zapamiętywania informacji użytkowników. 
 
-![Rejestracja użytkownika](register.jpeg)
+![Rejestracja użytkownika](docs/register.jpeg)
 
 
 
-![Logowanie się](login.jpeg)
+![Logowanie się](docs/login.jpeg)
 
 
 
@@ -42,11 +42,11 @@ Dla zwiększenia bezpieczeństwa użytkowników użyliśmy też Cookie JWT token
 
 Po wpisaniu pytania do linii zapytaniowej użytkownik otrzymuje szybką odpowiedź na pytanie.
 
-![Answer](test_answer.jpeg)
+![Answer](docs/test_answer.jpeg)
 
 Jest możliwość aktualizować odpowiedź używając strzałki pod odpowiedzią. 
 
-![Update Answer](update_answer.png)
+![Update Answer](docs/update_answer.png)
 
 
 
@@ -65,7 +65,7 @@ Exa to inteligentny system, który analizuje pytania użytkowników i wyszukuje 
 
 Z każdą nadaną odpowiedzią pojawia się randomowy fakt. 
 
-![](random_fact.png)
+![](docs/random_fact.png)
 
 
 
@@ -82,7 +82,7 @@ https://api-ninjas.com/api/facts
 
 
 
-![Historia](history.jpeg)
+![Historia](docs/history.jpeg)
 
 Dla zalogowanych użytkowników jest dostępna historia pytań z opisem dawności zadanego pytania i możliwością go usunięcia z historii. 
 
