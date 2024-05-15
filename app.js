@@ -57,7 +57,6 @@ async function sendDetailedQueryToExa(query) {
             numResults:1,
             highlights: { highlightsPerUrl: 5 }
           });
-        //   console.log(textContentsResults)
           textContentsResults.results.forEach(result => {
             addNewQuestion(userId, result.id, query, result.highlights);
             
@@ -72,7 +71,10 @@ async function sendDetailedQueryToExa(query) {
 
 
 
-const client = new MongoClient(connection_string);
+const client = new MongoClient(connection_string, {
+    ssl: true
+  });
+
 let db;
 let user_count;
 async function connectToDatabase() {
@@ -80,7 +82,6 @@ async function connectToDatabase() {
      await client.connect();
      console.log('Connected to MongoDB');
      db = client.db(DATASET_NAME); // Specify your database name
-    //  console.log(db.admin());
      user_count = await getUserCount();
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
@@ -108,7 +109,7 @@ app.post('/register', async (req, res) => {
       console.log("Email already exists");
       res.send("2");
       
-    }else{// Hash the password
+    }else{
     const hashedPassword = await bcrypt.hash(password, 10);
     try{
         await db.collection('users').insertOne({ user_id : parseInt(user_count+1), username, password: hashedPassword, email });
@@ -124,22 +125,17 @@ app.post('/register', async (req, res) => {
   });
   
   function makeNewUser() {
-    // Load existing users
     const users = loadUsers();
 
-    // Generate a new user ID
     const newUserId = users.users.length > 0 ? Math.max(...users.users.map(user => parseInt(user.userId))) + 1 : 1;
 
-    // Create a new user object with an empty questionsId array
     const newUser = {
-        userId: newUserId.toString(), // Ensure userId is a string to match the existing structure
+        userId: newUserId.toString(),
         questionsId: []
     };
 
-    // Add the new user to the list of users
     users.users.push(newUser);
 
-    // Save the updated list of users back to the file
     saveUsers(users);
 
     console.log(`New user with ID ${newUserId} created.`);
@@ -149,13 +145,13 @@ app.post('/register', async (req, res) => {
     try {
        const user = await db.collection('users').findOne({ username });
        if (user) {
-         return user.user_id.toString(); // Assuming user_id is the field you want to return
+         return user.user_id.toString();
        } else {
-         return "User not found"; // Return a specific error message or code
+         return "User not found"; 
        }
     } catch (error) {
        console.error("Error getting user ID:", error);
-       throw error; // Rethrow the error to be handled by the caller
+       throw error; 
     }
    }
 

@@ -1,9 +1,11 @@
 {
-  "name": "rest-project",
+  "name": "AI-bot-application",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "author": "",
+  "scripts": {
+    "start": "node ./app.js"
+  },
   "license": "ISC",
   "type": "module",
   "dependencies": {
