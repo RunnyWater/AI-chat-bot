@@ -1,4 +1,4 @@
-let history_opened = false;
+    let history_opened = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetch('/check_login')
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     function logout() {
-                        // Make a request to the server's logout endpoint
                         fetch('/logout', {
                             method: 'POST',
                             credentials: 'include',
@@ -33,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');
                             }
-                            // Redirect the user to the login page or homepage
-                            window.location.href = '/login'; // Adjust the URL as necessary
+                            window.location.href = '/login';
                         })
                         .catch(error => {
                             console.error('There was a problem with the fetch operation:', error);
@@ -62,7 +60,7 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
     document.getElementById('historyContainer').appendChild(hideHistoryButton);
     setTimeout(function() {
         hideHistoryButton.style.opacity = '1'; 
-    }, 10); // Delay in milliseconds
+    }, 10);
 
     if (!history_opened) {
         fetch('/get_history')
@@ -78,30 +76,23 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
             }else if(data === ''){
                 
             } else {
-                // Clear existing history
                 document.getElementById('question__div').innerHTML = '';
 
-                // Process each category
                 Object.keys(data).forEach(category => {
-                    // Check if the category has any questions
                     if (data[category].length > 0) {
-                        // Create a container for the category if it doesn't exist
                         let categoryContainer = document.getElementById(`${category}Container`);
                         if (!categoryContainer) {
                             categoryContainer = document.createElement('div');
                             categoryContainer.id = `${category}Container`;
-                            categoryContainer.className = 'categoryContainer'; // Add a class for styling
+                            categoryContainer.className = 'categoryContainer';
                             document.getElementById('question__div').appendChild(categoryContainer);
                         }
 
-                        // Add a title for the category
                         const categoryTitle = document.createElement('h3');
-                        categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1); // Capitalize the first letter
+                        categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1); 
                         categoryContainer.appendChild(categoryTitle);
 
-                        // Process each question in the category
                         data[category].forEach(question => {
-                            // Create the question HTML
                             const questionItem = document.createElement('li');
                             questionItem.className = 'history__items';
                             questionItem.innerHTML = `
@@ -110,7 +101,6 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                             `;
                             categoryContainer.appendChild(questionItem);
 
-                            // Add event listener for question click
                             document.getElementById(question).addEventListener('click', function() {
                                 fetch('/get_answer', {
                                     method: 'POST',
@@ -135,7 +125,6 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                                 });
                             });
 
-                            // Add event listener for delete click
                             document.getElementById(`delete_${question}`).addEventListener('click', function() {
                                 fetch('/delete_history', {
                                     method: 'DELETE',
@@ -145,12 +134,11 @@ document.getElementById('showHistoryButton').addEventListener('click', function(
                                     },
                                     body: JSON.stringify({ question: question }),
                                 })
-                                .then(response => response.json())
-                                .then(data => {
-                                    // Remove the deleted item from the UI
+                                .then(response => {
                                     const itemElement = document.getElementById(`${question}`).parentElement;
-                                    itemElement.remove(); // Remove the item from the UI
+                                    itemElement.remove(); 
                                 })
+                                .then(data => {                                })
                                 .catch((error) => {
                                     console.error('Error deleting question from history:', error);
                                     if (error.response) {
@@ -206,7 +194,6 @@ document.getElementById('ai_update').addEventListener('click', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
 
-    // Function to adjust the height of the textarea
     function autoResize() {
         this.style.height = 'auto';
         this.style.height = this.scrollHeight + 'px'; 
@@ -222,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const multilineInput = document.getElementById('multilineInput');
     const charCount = document.getElementById('charCount');
 
-    // Function to update the character count
     function updateCharCount() {
         const charCountValue = multilineInput.value.length;
         if (charCountValue >= 300) {
@@ -264,15 +250,13 @@ document.getElementById('ai_submit').addEventListener('click', function() {
         .then(response => response.json())
         .then(data => {
             let answerElementValue= data[0];
-            // console.log(answerElementValue)
             let randomFactValue = data[1];
-            // console.log(randomFactValue)
             document.getElementById('ai_user_search').innerText = text;
-            // delete_textarea();
             document.getElementById('ai__search').style.display = 'none';
 
             document.getElementById('ai__answer').innerText = answerElementValue;
             document.getElementById('ai_answer_list').style.display = "block";
+            
             // RANDOM FACT
             document.getElementById('random__fact__label').style.display = "block";
             document.getElementById('random__fact').innerText = randomFactValue;

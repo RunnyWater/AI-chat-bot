@@ -13,17 +13,12 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     .then(response => response.json())
     .then(data => {
         if (data === 0) {
-            // Registration was successful
-            // alert("Registration successful. Redirecting to login page...");
-            window.location.href = "/login"; // Redirect to login page
+            window.location.href = "/login";
         } else if (data === 1) {
-            // Username already exists
             alert("The username already exists. Please try again.");
         } else if (data === 2) {
-            // Email already exists
             alert("The email already exists. Please try again.");
         } else {
-            // Unknown response
             alert("An unknown error occurred.");
         }
     })

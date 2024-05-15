@@ -81,7 +81,7 @@ async function connectToDatabase() {
   try {
      await client.connect();
      console.log('Connected to MongoDB');
-     db = client.db(DATASET_NAME); // Specify your database name
+     db = client.db(DATASET_NAME);
      user_count = await getUserCount();
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
@@ -161,7 +161,7 @@ app.post('/register', async (req, res) => {
        return user !== null;
     } catch (error) {
        console.error("Error checking username:", error);
-       throw error; // Rethrow the error to be handled by the caller
+       throw error;
     }
    }
    
@@ -171,11 +171,10 @@ app.post('/register', async (req, res) => {
        return user !== null;
     } catch (error) {
        console.error("Error checking email:", error);
-       throw error; // Rethrow the error to be handled by the caller
+       throw error;
     }
    }
   
-  // Login route
   app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     console.log('login', username, password);
@@ -185,13 +184,13 @@ app.post('/register', async (req, res) => {
     }
     const user = await db.collection('users').findOne({ username });
    try {
-      // Wrap bcrypt.compare in a Promise
+     
       const isMatch = await new Promise((resolve, reject) => {
         bcrypt.compare(password, user.password, (err, result) => {
           if (err) {
-            reject(err); // Reject the promise if there's an error
+            reject(err);
           } else {
-            resolve(result); // Resolve the promise with the result
+            resolve(result); 
           }
         });
       });
@@ -201,12 +200,9 @@ app.post('/register', async (req, res) => {
         global_username = username;
         console.log(userId, global_username);
         
-        // Generate the token before sending the response
         const token = jwt.sign({ username: req.body.username }, SECRET_KEY, { expiresIn: '24h' });
-        // Set the token as a HttpOnly cookie
         res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict' });
 
-        // Now send the response
         return res.send("0");
       } else {
         return res.send("1");
@@ -218,7 +214,6 @@ app.post('/register', async (req, res) => {
 });
   
 app.get('/check_login', (req, res) => {
-    // console.log(global_username);
     if (userId === "0") {
         res.send("0");
     }
@@ -238,30 +233,28 @@ app.get('/register', (req, res) => {
 })
 
 async function getNewRandomFact() {
-    const url = 'https://api.api-ninjas.com/v1/facts'; // Removed the limit parameter
+    const url = 'https://api.api-ninjas.com/v1/facts';
     const options = {
         method: 'GET',
         headers: {
-            'X-Api-Key': api_key_ninja // Ensure this is correctly set
+            'X-Api-Key': api_key_ninja
         }
     };
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
             console.error(`HTTP error! status: ${response.status}`);
-            // Attempt to log the response body for more details
             const errorBody = await response.text();
             console.error('Response body:', errorBody);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Assuming the API returns an array of facts, pick the first one
         const fact = data[0]?.fact;
         console.log(fact);
-        return fact; // Return the fact
+        return fact; 
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
-        return ''; // Return an empty string or handle the error as needed
+        return ''; 
     }
 }
 
@@ -289,15 +282,14 @@ app.post('/ai_answer', async (req, res) => {
         res.send(answer);
     } else {
         try {
-            random_fact = await getNewRandomFact(); // Await the completion of the fetch operation
-            // Assuming sendDetailedQueryToExa now returns a Promise that resolves to the desired value
+            random_fact = await getNewRandomFact();
             const detailedQueryResult = await sendDetailedQueryToExa(query);
             let answer = [detailedQueryResult, random_fact];
             res.send(answer);
             random_fact = '';
         } catch (error) {
             console.error('Error fetching random fact or sending detailed query:', error);
-            res.sendStatus(500); // Send a server error response
+            res.sendStatus(500); 
         }
     }
 });
@@ -330,7 +322,6 @@ function getRandomFactFromQuestionId(questionId) {
     const questions = loadQuestions();
     const question = questions.questions.find(q => q.id === questionId);
     if (!question) {
-        // Handle the case where the question is not found, e.g., return a default value or an error message
         return "Question not found";
     }
     return question.fact;
@@ -342,13 +333,11 @@ function getUserQuestionHistory(userId) {
     const users = loadUsers();
     const questions = loadQuestions();
 
-    // Find the user
     const user = users.users.find(user => user.userId === userId);
     if (!user) {
         return { error: 'User not found' };
     }
 
-    // Initialize categories
     const categories = {
         today: [],
         yesterday: [],
@@ -356,23 +345,18 @@ function getUserQuestionHistory(userId) {
         older: []
     };
 
-    // Get today's date at the start of the day in UTC
     const today = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()));
 
-    // Fetch the user's question history and categorize them
     user.questionsId.forEach(qId => {
         const question = questions.questions.find(q => q.id === qId[0]);
         if (!question) {
-            return; // Skip if question not found
+            return;
         }
 
-        // Convert the given date string into a Date object in UTC
         const questionDate = new Date(Date.UTC(qId[2].split('-')[2], qId[2].split('-')[1] - 1, qId[2].split('-')[0]));
 
-        // Calculate the difference in days
         const diffInDays = Math.floor((today - questionDate) / (1000 * 60 * 60 * 24));
 
-        // Categorize the question based on its date
         if (diffInDays === 0) {
             categories.today.push(question.question);
         } else if (diffInDays === 1) {
@@ -383,30 +367,28 @@ function getUserQuestionHistory(userId) {
             categories.older.push(question.question);
         }
     });
-
+    Object.keys(categories).forEach(key => {
+        categories[key].reverse();
+    });
     return categories;
 }
 
 
 
 function getResponseByUserIdAndQuestionId(userId, questionId) {
-    // Load users and questions
     const users = loadUsers();
     const questions = loadQuestions();
 
-    // Find the user
     const user = users.users.find(user => user.userId === userId);
     if (!user) {
         return { error: 'User not found' };
     }
 
-    // Find the question
     const question = questions.questions.find(q => q.id === questionId);
     if (!question) {
         return { error: 'Question not found' };
     }
 
-    // Find the user's current response index for the question
     const questionIndex = user.questionsId.findIndex(q => q[0] === questionId);
     if (questionIndex === -1) {
         return { error: 'User has not interacted with this question' };
@@ -433,27 +415,20 @@ function getQuestionIdByContent(query) {
 
 
 function addQuestionIdToUser(userId, questionId) {
-    // Load users data
     const users = loadUsers();
 
-    // Find the user by userId
     const user = users.users.find(user => user.userId === userId);
-    // If the user is found
     if (user) {
-        // Check if the questionId is already in the user's questionsId array
         if (!user.questionsId.some(qId => qId[0] === questionId)) {
-            // Generate a timestamp for the current date and time
             const date = new Date();
             const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
             
-            // Add the questionId, initial response index, and timestamp to the user's questionsId array
-            user.questionsId.push([questionId, 0, formattedDate]); // Assuming the initial response index is 0
+            user.questionsId.push([questionId, 0, formattedDate]);
             console.log(`Question ID ${questionId} added to user ${userId} on ${formattedDate}.`);
         } else {
             console.log(`User ${userId} already has question ID ${questionId}.`);
         }
 
-        // Save the updated users data
         saveUsers(users);
     } else {
         console.log(`User with ID ${userId} not found.`);
@@ -462,12 +437,11 @@ function addQuestionIdToUser(userId, questionId) {
 
 
 function addNewQuestion(userId, id, question, responses) {
-    // console.log(userId, id, question, responses)
     const users = loadUsers();
     const questions = loadQuestions();
-    // Add the new question to the questions list
     const newQuestionId = id;
-    // console.log(random_fact);
+    const date = new Date();
+    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
     questions.questions.push({
         id: newQuestionId,
         question,
@@ -476,10 +450,9 @@ function addNewQuestion(userId, id, question, responses) {
     });
     saveQuestions(questions);
 
-    // Update the user's current question ID and response index
     const user = users.users.find(user => user.userId.toString() === userId.toString());
     if (user) {
-        user.questionsId.push([newQuestionId, 0]); // Add new question ID with initial response index 0
+        user.questionsId.push([newQuestionId, 0, formattedDate]); 
         saveUsers(users);
     }
 }
@@ -497,10 +470,9 @@ function getNextResponse(userId, questionId) {
     const question = questions.questions.find(q => q.id === questionId);
     if (!question) return null;
 
-    // Increment the currentResponseIndex and wrap around if necessary
     const newResponseIndex = (responseIndex + 1) % question.responses.length;
-    user.questionsId[questionIndex][1] = newResponseIndex; // Update the response index in the user's questionsId
-    saveUsers(users); // Save the updated user data
+    user.questionsId[questionIndex][1] = newResponseIndex;
+    saveUsers(users);
 
     return question.responses[newResponseIndex];
 }
@@ -529,18 +501,15 @@ function saveQuestions(questions) {
 app.post('/logout', (req, res) => {
     global_username = '';
     userId = '0';
-    res.clearCookie('token'); // Clear the token cookie
-    res.sendStatus(200); // Send a success status
+    res.clearCookie('token');
+    res.sendStatus(200); 
 });
 
-app.use(function (req, res, next) {
-    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-});
 
 app.use((req, res, next) => {
-    console.log('Cookies:', req.cookies); // Log the cookies to see if they're being parsed
+    console.log('Cookies:', req.cookies);
     const token = req.cookies?.token ?? null;
-    if (token == null) return res.sendStatus(401); // if there isn't any token
+    if (token == null) return res.sendStatus(401);
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) return res.sendStatus(403);
@@ -552,49 +521,38 @@ app.use((req, res, next) => {
 
 
 async function loadUserById(userId) {
-    // Load user data from your database
-    // This is a placeholder implementation; replace it with your actual database logic
-    const users = loadUsers(); // Assuming this function loads all users
+    const users = loadUsers(); 
     return users.users.find(user => user.userId === userId);
 }
 
 async function saveUser(user) {
-    // Save the updated user data back to your database
-    // This is a placeholder implementation; replace it with your actual database logic
-    const users = loadUsers(); // Load all users
+    const users = loadUsers();
     const index = users.users.findIndex(u => u.userId === user.userId);
     if (index !== -1) {
-        users.users[index] = user; // Update the user data
-        saveUsers(users); // Save the updated list of users
+        users.users[index] = user;
+        saveUsers(users); 
     }
 }
 
 app.delete('/delete_history', async (req, res) => {
-    // res.status(200).send({ message: 'DELETE request received' });
     const question  = req.body.question ;
-    // Assuming you have a way to identify the current user, e.g., through a session or token
 
     try {
-        // Load the current user's data
         const user = await loadUserById(userId);
         if (!user) {
             return res.status(404).send({ error: 'User not found' });
         }
         const question_id = getQuestionIdByContent(question);
-        // Find the index of the question in the user's history
         const questionIndex = user.questionsId.findIndex(q => q[0] === question_id);
         if (questionIndex === -1) {
-            return res.status(404).send({ error: 'Question not found in user history' });
+            return res.send({ error: 'Question not found in user history' });
         }
 
-        // Remove the question from the user's history
         user.questionsId.splice(questionIndex, 1);
 
-        // Save the updated user data
         await saveUser(user);
 
-        // Send a success response
-        // res.sendStatus(200);
+        res.sendStatus(200);
     } catch (error) {
         console.error('Error deleting question from history:', error);
         res.status(500).send({ error: 'Internal server error' });

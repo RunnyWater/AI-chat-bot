@@ -330,7 +330,6 @@ body {
     z-index: 0;
     position: relative;
     width: 300%;
-    /* height: auto; */
     background-color: #292929;
     display: flex;
     align-items: center;
@@ -421,8 +420,8 @@ a.reset-link:active {
 }
 .api {
     padding: 50px 20px 0px 20px;
-    align-items: center; /* Align items vertically in the center */
-    justify-content: space-between; /* Space out the children */
+    align-items: center;
+    justify-content: space-between;
 }
 
 .logged_in_box{
