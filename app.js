@@ -25,10 +25,16 @@ app.use(cookieParser());
 const api_key_exa =  process.env.API_KEY_EXA;
 // Get you api-key at https://api-ninjas.com/api
 const api_key_ninja = process.env.API_KEY_NINJA;
-// Make and put your dataset name
-const DATASET_NAME = process.env.DATASET_NAME;
 // Get a connection string to this collection
 const connection_string = process.env.CONNECTION_STRING;
+// Make and put your dataset name
+const DATASET_NAME = 'chatbot';
+
+if (!api_key_exa || !api_key_ninja || !connection_string) {
+    console.error('Please set all environment variables.');
+    process.exit(1);
+}
+
 const exa = new Exa(api_key_exa);
 const SECRET_KEY = crypto.randomBytes(64).toString('hex');
 
@@ -71,22 +77,30 @@ async function sendDetailedQueryToExa(query) {
 
 
 
-const client = new MongoClient(connection_string, {
-    ssl: true
-  });
 
 let db;
 let user_count;
 async function connectToDatabase() {
   try {
-     await client.connect();
-     console.log('Connected to MongoDB');
-     db = client.db(DATASET_NAME);
-     user_count = await getUserCount();
+    const client = new MongoClient(connection_string);
+    
+    await client.connect();
+    console.log('Connected to MongoDB');
+    db = client.db(DATASET_NAME);
+    if (!db) {
+        console.error("Database connection not established.");
+        process.exit(1); 
+    }
+
+    user_count = await getUserCount();
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
   }
 }
+
+connectToDatabase();
+
+
 
 async function getUserCount() {
   try {
@@ -97,7 +111,6 @@ async function getUserCount() {
   }
 }
 
-connectToDatabase();
 
 app.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
