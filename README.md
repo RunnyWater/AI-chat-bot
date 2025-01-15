@@ -17,6 +17,7 @@ Exa AI API is a powerful platform designed to provide advanced artificial intell
 
 <br><br><br><br>
 
+![](http://wes.io/Vfcs/content) 
 # AI Chat Bot Docker Setup
 This repository contains the setup script for initializing and running a Dockerized AI chatbot application. The setup script automates the process of configuring environment variables, building Docker images, and starting the containers.
 
@@ -29,10 +30,10 @@ Before using the setup script, ensure that you have the following installed:
 ## Getting Started
 ### 1. Clone the Repository using Git:
 
-    ```
-    git clone https://github.com/RunnyWater/AI-chat-bot.git
-    cd AI-chat-bot
-    ```
+```
+git clone https://github.com/RunnyWater/AI-chat-bot.git
+cd AI-chat-bot
+```
 ### 2. Run setup file 
 (Zero setup) If you don't have .env file with API keys:
 
