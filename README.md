@@ -23,7 +23,6 @@ This repository contains the setup script for initializing and running a Dockeri
 ## Requirements
 Before using the setup script, ensure that you have the following installed:
 
-- Node.js (v16 or higher)
 - Docker (with Docker Compose)
 - Git (optional, if you clone this repository)
 
